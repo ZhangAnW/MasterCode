@@ -67,7 +67,7 @@ void KinoReplanFSM::init(ros::NodeHandle& nh) {
 void KinoReplanFSM::waypointCallback(const nav_msgs::PathConstPtr& msg) {
   if (msg->poses[0].pose.position.z < -0.1) return;
 
-  cout << "Triggered!" << endl;
+  cout << "waypointCallback:Triggered!" << endl;
   trigger_ = true;
 
   if (target_type_ == TARGET_TYPE::MANUAL_TARGET) {
@@ -79,8 +79,9 @@ void KinoReplanFSM::waypointCallback(const nav_msgs::PathConstPtr& msg) {
     end_pt_(2)  = waypoints_[current_wp_][2];
     current_wp_ = (current_wp_ + 1) % waypoint_num_;
   }
+  cout <<"end_pt_"<< end_pt_(0)<<" "<<end_pt_(1)<<" "<<end_pt_(2)<< endl;
 
-  visualization_->drawGoal(end_pt_, 0.3, Eigen::Vector4d(1, 0, 0, 1.0));
+  visualization_->drawGoal(end_pt_, 0.3, Eigen::Vector4d(0, 0, 1, 1.0));//终点可视化
   end_vel_.setZero();
   have_target_ = true;
 
@@ -159,7 +160,7 @@ void KinoReplanFSM::execFSMCallback(const ros::TimerEvent& e) {
       Eigen::Vector3d rot_x = odom_orient_.toRotationMatrix().block(0, 0, 3, 1);
       start_yaw_(0)         = atan2(rot_x(1), rot_x(0));
       start_yaw_(1) = start_yaw_(2) = 0.0;
-
+      cout<<"GEN_NEW_TRAJ start_pt_ "<< start_pt_(0)<<" "<<start_pt_(1)<<" "<<start_pt_(2)<< endl;
       bool success = callKinodynamicReplan();
       if (success) {
         changeFSMExecState(EXEC_TRAJ, "FSM");
@@ -173,6 +174,7 @@ void KinoReplanFSM::execFSMCallback(const ros::TimerEvent& e) {
 
     case EXEC_TRAJ: {
       /* determine if need to replan */
+
       LocalTrajData* info     = &planner_manager_->local_data_;
       ros::Time      time_now = ros::Time::now();
       double         t_cur    = (time_now - info->start_time_).toSec();
@@ -181,16 +183,16 @@ void KinoReplanFSM::execFSMCallback(const ros::TimerEvent& e) {
       Eigen::Vector3d pos = info->position_traj_.evaluateDeBoorT(t_cur);
 
       /* && (end_pt_ - pos).norm() < 0.5 */
-      if (t_cur > info->duration_ - 1e-2) {
+      if (t_cur > info->duration_ - 1e-2) {//持续时间大于规划时间
         have_target_ = false;
         changeFSMExecState(WAIT_TARGET, "FSM");
         return;
 
-      } else if ((end_pt_ - pos).norm() < no_replan_thresh_) {
+      } else if ((end_pt_ - pos).norm() < no_replan_thresh_) {//快到达终点
         // cout << "near end" << endl;
         return;
 
-      } else if ((info->start_pos_ - pos).norm() < replan_thresh_) {
+      } else if ((info->start_pos_ - pos).norm() < replan_thresh_) {//很接近起点
         // cout << "near start" << endl;
         return;
 
@@ -310,8 +312,9 @@ bool KinoReplanFSM::callKinodynamicReplan() {
       planner_manager_->kinodynamicReplan(start_pt_, start_vel_, start_acc_, end_pt_, end_vel_);
 
   if (plan_success) {
-
+    std::cout<<"plan success"<<std::endl;
     planner_manager_->planYaw(start_yaw_);
+    std::cout<<"plan yaw success"<<std::endl;
 
     auto info = &planner_manager_->local_data_;
 
@@ -322,7 +325,6 @@ bool KinoReplanFSM::callKinodynamicReplan() {
     bspline.traj_id    = info->traj_id_;
 
     Eigen::MatrixXd pos_pts = info->position_traj_.getControlPoint();
-
     for (int i = 0; i < pos_pts.rows(); ++i) {
       geometry_msgs::Point pt;
       pt.x = pos_pts(i, 0);
@@ -347,10 +349,10 @@ bool KinoReplanFSM::callKinodynamicReplan() {
 
     /* visulization */
     auto plan_data = &planner_manager_->plan_data_;
-    visualization_->drawGeometricPath(plan_data->kino_path_, 0.075, Eigen::Vector4d(1, 1, 0, 0.4));
+    // visualization_->drawGeometricPath(plan_data->kino_path_, 0.075, Eigen::Vector4d(1, 1, 0, 0.4));
     visualization_->drawBspline(info->position_traj_, 0.1, Eigen::Vector4d(1.0, 0, 0.0, 1), true, 0.2,
-                                Eigen::Vector4d(1, 0, 0, 1));
-
+                                Eigen::Vector4d(1, 0, 1, 1));
+    ROS_INFO("visulization success");
     return true;
 
   } else {

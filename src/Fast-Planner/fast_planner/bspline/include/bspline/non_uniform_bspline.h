@@ -73,7 +73,7 @@ public:
   Eigen::VectorXd   evaluateDeBoor(const double& u);   // use u \in [up, u_mp]
   Eigen::VectorXd   evaluateDeBoorT(const double& t);  // use t \in [0, duration]
   NonUniformBspline getDerivative();
-
+  
   // 3D B-spline interpolation of points in point_set, with boundary vel&acc
   // constraints
   // input : (K+2) points with boundary vel/acc; ts

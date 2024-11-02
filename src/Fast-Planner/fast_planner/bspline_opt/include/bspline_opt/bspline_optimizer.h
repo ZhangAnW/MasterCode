@@ -29,6 +29,7 @@
 #include <Eigen/Eigen>
 #include <plan_env/edt_environment.h>
 #include <ros/ros.h>
+#include "bspline_opt/lbfgs.hpp"
 
 // Gradient and elasitc band optimization
 
@@ -36,6 +37,36 @@
 // Output: the optimized sequence of points
 // The format of points: N x 3 matrix, each row is a point
 namespace fast_planner {
+
+  class ControlPoints
+  {
+  public:
+    double clearance;
+    int size;
+    Eigen::MatrixXd points;
+    std::vector<std::vector<Eigen::Vector3d>> base_point; // The point at the statrt of the direction vector (collision point)
+    std::vector<std::vector<Eigen::Vector3d>> direction;  // Direction vector, must be normalized.
+    std::vector<bool> flag_temp;                          // A flag that used in many places. Initialize it everytime before using it.
+    // std::vector<bool> occupancy;
+
+    void resize(const int size_set)
+    {
+      size = size_set;
+
+      base_point.clear();
+      direction.clear();
+      flag_temp.clear();
+      // occupancy.clear();
+
+      points.resize(3, size_set);
+      base_point.resize(size);
+      direction.resize(size);
+      flag_temp.resize(size);
+      // occupancy.resize(size);
+    }
+  };
+
+
 class BsplineOptimizer {
 
 public:
@@ -70,6 +101,12 @@ public:
   void setGuidePath(const vector<Eigen::Vector3d>& guide_pt);
   void setWaypoints(const vector<Eigen::Vector3d>& waypts,
                     const vector<int>&             waypt_idx);  // N-2 constraints at most
+  
+  
+  bool BsplineOptimizeTrajRebound(Eigen::MatrixXd &optimal_points, double ts); // must be called after initControlPoints()
+  bool rebound_optimize(Eigen::MatrixXd &optimal_points);
+  static double costFunctionRebound(void *func_data, const double *x, double *grad, const int n);
+  void combineCostRebound(const double *x, double *grad, double &f_combine, const int n);
 
   void optimize();
 
@@ -78,7 +115,12 @@ public:
 
 private:
   EDTEnvironment::Ptr edt_environment_;
-
+      enum FORCE_STOP_OPTIMIZE_TYPE
+    {
+      DONT_STOP,
+      STOP_FOR_REBOUND,
+      STOP_FOR_ERROR
+    } force_stop_type_;
   // main input
   Eigen::MatrixXd control_points_;     // B-spline control points, N x dim
   double          bspline_interval_;   // B-spline knot span
@@ -93,13 +135,14 @@ private:
   int    cost_function_;               // used to determine objective function
   bool   dynamic_;                     // moving obstacles ?
   double start_time_;                  // global time for moving obstacles
+  ControlPoints cps_;
 
   /* optimization parameters */
   int    order_;                  // bspline degree
   double lambda1_;                // jerk smoothness weight
-  double lambda2_;                // distance weight
+  double lambda2_, new_lambda2_;  // distance weight
   double lambda3_;                // feasibility weight
-  double lambda4_;                // end point weight
+  double lambda4_;                // end point weight   // curve fitting
   double lambda5_;                // guide cost weight
   double lambda6_;                // visibility cost weight
   double lambda7_;                // waypoints cost weight
@@ -145,8 +188,8 @@ private:
                           vector<Eigen::Vector3d>& gradient);
   void calcDistanceCost(const vector<Eigen::Vector3d>& q, double& cost,
                         vector<Eigen::Vector3d>& gradient);
-  void calcFeasibilityCost(const vector<Eigen::Vector3d>& q, double& cost,
-                           vector<Eigen::Vector3d>& gradient);
+  // void calcFeasibilityCost(const vector<Eigen::Vector3d>& q, double& cost,
+  //                          vector<Eigen::Vector3d>& gradient);
   void calcEndpointCost(const vector<Eigen::Vector3d>& q, double& cost,
                         vector<Eigen::Vector3d>& gradient);
   void calcGuideCost(const vector<Eigen::Vector3d>& q, double& cost, vector<Eigen::Vector3d>& gradient);
@@ -156,6 +199,19 @@ private:
                          vector<Eigen::Vector3d>& gradient);
   void calcViewCost(const vector<Eigen::Vector3d>& q, double& cost, vector<Eigen::Vector3d>& gradient);
   bool isQuadratic();
+
+      // q contains all control points
+    void calcSmoothnessCost(const Eigen::MatrixXd &q, double &cost,
+                            Eigen::MatrixXd &gradient, bool falg_use_jerk = true);
+    void calcFeasibilityCost(const Eigen::MatrixXd &q, double &cost,
+                             Eigen::MatrixXd &gradient);
+    void calcDistanceCostRebound(const Eigen::MatrixXd &q, double &cost, Eigen::MatrixXd &gradient, int iter_num, double smoothness_cost);
+    void calcFitnessCost(const Eigen::MatrixXd &q, double &cost, Eigen::MatrixXd &gradient);
+    void calcSwingCost(const Eigen::MatrixXd &q, double &cost, Eigen::MatrixXd &gradient);
+    static int earlyExit(void *func_data, const double *x, const double *g, const double fx, const double xnorm, const double gnorm, const double step, int n, int k, int ls);
+
+    
+
 
   /* for benckmark evaluation only */
 public:

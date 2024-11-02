@@ -41,10 +41,11 @@ KinodynamicAstar::~KinodynamicAstar()
 int KinodynamicAstar::search(Eigen::Vector3d start_pt, Eigen::Vector3d start_v, Eigen::Vector3d start_a,
                              Eigen::Vector3d end_pt, Eigen::Vector3d end_v, bool init, bool dynamic, double time_start)
 {
+  //起始点的赋值
   start_vel_ = start_v;
   start_acc_ = start_a;
 
-  PathNodePtr cur_node = path_node_pool_[0];
+  PathNodePtr cur_node = path_node_pool_[0];//用于存储当前节点
   cur_node->parent = NULL;
   cur_node->state.head(3) = start_pt;
   cur_node->state.tail(3) = start_v;
@@ -121,6 +122,10 @@ int KinodynamicAstar::search(Eigen::Vector3d start_pt, Eigen::Vector3d start_v, 
       if (is_shot_succ_)
       {
         std::cout << "reach end" << std::endl;
+        cout<<"get Astar path "<<path_nodes_.size()<<endl;
+        for(auto node:path_nodes_){
+          std::cout<<node->state.head(6).transpose()<<endl;//x,y,z,vx,vy,vz
+        }
         return REACH_END;
       }
       else if (cur_node->parent != NULL)
@@ -591,11 +596,12 @@ void KinodynamicAstar::reset()
 std::vector<Eigen::Vector3d> KinodynamicAstar::getKinoTraj(double delta_t)
 {
   vector<Vector3d> state_list;
-
   /* ---------- get traj of searching ---------- */
-  PathNodePtr node = path_nodes_.back();
+  PathNodePtr node = path_nodes_.back();//获取最后一个节点
   Matrix<double, 6, 1> x0, xt;
-
+  // ROS_WARN("KinodynamicAstar::getKinoTraj");
+  // cout<<"end node"<<endl;
+  // cout<<node->state.transpose()<<endl;
   while (node->parent != NULL)
   {
     Vector3d ut = node->input;
@@ -610,6 +616,9 @@ std::vector<Eigen::Vector3d> KinodynamicAstar::getKinoTraj(double delta_t)
     node = node->parent;
   }
   reverse(state_list.begin(), state_list.end());
+  // ROS_WARN("KinodynamicAstar::getKinoTraj");
+  // cout<<"end list node"<<endl;
+  // cout<<state_list.at(state_list.size()-1)<<endl;
   /* ---------- get traj of one shot ---------- */
   if (is_shot_succ_)
   {
@@ -629,14 +638,16 @@ std::vector<Eigen::Vector3d> KinodynamicAstar::getKinoTraj(double delta_t)
       state_list.push_back(coord);
     }
   }
-
+  // ROS_WARN("KinodynamicAstar::getKinoTraj");
+  // cout<<"end list node"<<endl;
+  // cout<<state_list.at(state_list.size()-1)<<endl;
   return state_list;
 }
 
 void KinodynamicAstar::getSamples(double& ts, vector<Eigen::Vector3d>& point_set,
                                   vector<Eigen::Vector3d>& start_end_derivatives)
 {
-  /* ---------- path duration ---------- */
+  /* ---------- path duration ---------- *///计算总时间
   double T_sum = 0.0;
   if (is_shot_succ_)
     T_sum += t_shot_;
@@ -648,7 +659,7 @@ void KinodynamicAstar::getSamples(double& ts, vector<Eigen::Vector3d>& point_set
   }
   // cout << "duration:" << T_sum << endl;
 
-  // Calculate boundary vel and acc
+  // Calculate boundary vel and acc//计算终点边界速度和加速度
   Eigen::Vector3d end_vel, end_acc;
   double t;
   if (is_shot_succ_)
@@ -668,14 +679,14 @@ void KinodynamicAstar::getSamples(double& ts, vector<Eigen::Vector3d>& point_set
     end_acc = path_nodes_.back()->input;
   }
 
-  // Get point samples
-  int seg_num = floor(T_sum / ts);
+  // Get point samples获得b样条采样点
+  int seg_num = floor(T_sum / ts);//计算分段个数
   seg_num = max(8, seg_num);
-  ts = T_sum / double(seg_num);
+  ts = T_sum / double(seg_num);//分段时间
   bool sample_shot_traj = is_shot_succ_;
   node = path_nodes_.back();
 
-  for (double ti = T_sum; ti > -1e-5; ti -= ts)
+  for (double ti = T_sum; ti > -1e-5; ti -= ts)//倒序遍历
   {
     if (sample_shot_traj)
     {
@@ -723,7 +734,7 @@ void KinodynamicAstar::getSamples(double& ts, vector<Eigen::Vector3d>& point_set
       }
     }
   }
-  reverse(point_set.begin(), point_set.end());
+  reverse(point_set.begin(), point_set.end());  //得到按照期望间隔的点集
 
   // calculate start acc
   Eigen::Vector3d start_acc;
@@ -775,7 +786,7 @@ void KinodynamicAstar::stateTransit(Eigen::Matrix<double, 6, 1>& state0, Eigen::
     phi_(i, i + 3) = tau;
 
   Eigen::Matrix<double, 6, 1> integral;
-  integral.head(3) = 0.5 * pow(tau, 2) * um;
+  integral.head(3) = 0.5 * pow(tau, 2) * um;//x=x0+1/2*tau*u
   integral.tail(3) = tau * um;
 
   state1 = phi_ * state0 + integral;

@@ -765,11 +765,11 @@ void SDFMap::clearAndInflateLocalMap() {
 void SDFMap::visCallback(const ros::TimerEvent& /*event*/) {
   publishMap();
   publishMapInflate(false);
-  // publishUpdateRange();
-  // publishESDF();
+  publishUpdateRange();
+  publishESDF();
 
-  // publishUnknown();
-  // publishDepth();
+  publishUnknown();
+  publishDepth();
 }
 
 void SDFMap::updateOccupancyCallback(const ros::TimerEvent& /*event*/) {
@@ -1042,10 +1042,28 @@ void SDFMap::publishMapInflate(bool all_info) {
 
   boundIndex(min_cut);
   boundIndex(max_cut);
+  ROS_WARN("min_cut: %d %d %d, max_cut: %d %d %d",min_cut(0),min_cut(1),min_cut(2),max_cut(0),max_cut(1),max_cut(2));
+  cout<<min_cut<<max_cut<<endl;
+  // for (int x = min_cut(0); x <= max_cut(0); ++x)
+  //   for (int y = min_cut(1); y <= max_cut(1); ++y)
+  //     for (int z = min_cut(2); z <= max_cut(2); ++z) {
+  //       if (md_.occupancy_buffer_inflate_[toAddress(x, y, z)] == 0) continue;
 
-  for (int x = min_cut(0); x <= max_cut(0); ++x)
-    for (int y = min_cut(1); y <= max_cut(1); ++y)
-      for (int z = min_cut(2); z <= max_cut(2); ++z) {
+  //       Eigen::Vector3d pos;
+  //       indexToPos(Eigen::Vector3i(x, y, z), pos);
+  //       if (pos(2) > mp_.visualization_truncate_height_) continue;
+
+  //       pt.x = pos(0);
+  //       pt.y = pos(1);
+  //       pt.z = pos(2);
+  //       cloud.push_back(pt);
+  //     }
+  min_cut = Eigen::Vector3i(0, 0, 0);
+  max_cut = Eigen::Vector3i(2, 2, 2);
+
+  for (int x = 0; x <= 300; ++x)
+    for (int y = 0; y <= 150; ++y)
+      for (int z = 0; z <= 30; ++z) {
         if (md_.occupancy_buffer_inflate_[toAddress(x, y, z)] == 0) continue;
 
         Eigen::Vector3d pos;

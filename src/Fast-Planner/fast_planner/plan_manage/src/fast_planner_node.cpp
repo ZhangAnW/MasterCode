@@ -47,6 +47,7 @@ int main(int argc, char** argv) {
   KinoReplanFSM kino_replan;
 
   if (planner == 1) {
+    ROS_WARN("fast_planner_node:kino_replan.init");
     kino_replan.init(nh);
   } else if (planner == 2) {
     topo_replan.init(nh);
