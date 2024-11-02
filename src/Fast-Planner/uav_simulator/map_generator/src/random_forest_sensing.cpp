@@ -209,8 +209,8 @@ void pubSensedPoints() {
 
   if (isnan(searchPoint.x) || isnan(searchPoint.y) || isnan(searchPoint.z))
     return;
-
   if (kdtreeLocalMap.radiusSearch(searchPoint, _sensing_range,
+  
                                   pointIdxRadiusSearch,
                                   pointRadiusSquaredDistance) > 0) {
     for (size_t i = 0; i < pointIdxRadiusSearch.size(); ++i) {
