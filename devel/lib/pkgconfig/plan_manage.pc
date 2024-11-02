@@ -3,6 +3,6 @@ prefix=/home/zawubuntu/code/my_code/devel
 Name: plan_manage
 Description: Description of plan_manage
 Version: 0.0.0
-Cflags: -I/home/zawubuntu/code/my_code/devel/include -I/home/zawubuntu/code/my_code/src/fast-planner/src/Fast-Planner/fast_planner/plan_manage/include
+Cflags: -I/home/zawubuntu/code/my_code/devel/include -I/home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/plan_manage/include
 Libs: -L${prefix}/lib -lplan_manage
 Requires: plan_env path_searching bspline bspline_opt traj_utils message_runtime

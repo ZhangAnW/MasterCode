@@ -3,6 +3,6 @@ prefix=/home/zawubuntu/code/my_code/devel
 Name: plan_env
 Description: Description of plan_env
 Version: 0.0.0
-Cflags: -I/home/zawubuntu/code/my_code/src/fast-planner/src/Fast-Planner/fast_planner/plan_env/include
+Cflags: -I/home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/plan_env/include
 Libs: -L${prefix}/lib -lplan_env
 Requires: roscpp std_msgs

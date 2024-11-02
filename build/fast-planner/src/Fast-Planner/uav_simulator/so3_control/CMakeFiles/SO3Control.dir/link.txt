@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC   -shared -Wl,-soname,libSO3Control.so -o /home/zawubuntu/code/my_code/devel/lib/libSO3Control.so CMakeFiles/SO3Control.dir/src/SO3Control.cpp.o   -L/home/zawubuntu/code/my_code/src/fast-planner/src/Fast-Planner/uav_simulator/Utils/cmake_utils/lib/mosek8 
