@@ -128,14 +128,14 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
                                            Eigen::Vector3d end_vel) {
 
   std::cout << "[kino replan]: -----------------------" << std::endl;
-  cout << "start: " 
+  std::cout << "start: " 
        << start_pt.transpose() << ", " << start_vel.transpose() << ", " << start_acc.transpose() 
        << "\ngoal:" 
        << end_pt.transpose() << ", " << end_vel.transpose()
-       << endl;
+       << std::endl;
 
   if ((start_pt - end_pt).norm() < 0.2) {
-    cout << "Close goal" << endl;
+    std::cout << "Close goal" << std::endl;
     return false;
   }
 
@@ -153,7 +153,7 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
   int status = kino_path_finder_->search(start_pt, start_vel, start_acc, end_pt, end_vel, true);
 
   if (status == KinodynamicAstar::NO_PATH) {
-    cout << "[kino replan]: kinodynamic search fail!" << endl;
+    std::cout << "[kino replan]: kinodynamic search fail!" << std::endl;
 
     // retry searching with discontinuous initial state
     kino_path_finder_->reset();
@@ -161,21 +161,21 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
     status = kino_path_finder_->search(start_pt, start_vel, start_acc, end_pt, end_vel, false);
 
     if (status == KinodynamicAstar::NO_PATH) {
-      cout << "[kino replan]: Can't find path." << endl;
+      std::cout << "[kino replan]: Can't find path." << std::endl;
       return false;
     } else {
-      cout << "[kino replan]: retry search success." << endl;
+      std::cout << "[kino replan]: retry search success." << std::endl;
     }
 
   } else {
-    cout << "[kino replan]: kinodynamic search success." << endl;
+    std::cout << "[kino replan]: kinodynamic search success." << std::endl;
   }
 
   plan_data_.kino_path_ = kino_path_finder_->getKinoTraj(0.01);//获得轨迹。3*n
-  cout<< "getKinoTraj kino_path_ "<<plan_data_.kino_path_.size()<<endl;
+  std::cout<< "getKinoTraj kino_path_ "<<plan_data_.kino_path_.size()<<std::endl;
   //打印kino_path_的起点和终点
-  cout << "kino_path_ start: " << plan_data_.kino_path_.front().transpose() << endl;
-  cout << "kino_path_ end: " << plan_data_.kino_path_.back().transpose() << endl;
+  std::cout << "kino_path_ start: " << plan_data_.kino_path_.front().transpose() << std::endl;
+  std::cout << "kino_path_ end: " << plan_data_.kino_path_.back().transpose() << std::endl;
   t_search = (ros::Time::now() - t1).toSec();
 
   // parameterize the path to bspline
@@ -185,15 +185,15 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
   //获得特定时间间隔的采样点并更新ts间隔时间
   kino_path_finder_->getSamples(ts, point_set, start_end_derivatives);
 
-  cout<< "getSamples "<<point_set.size()<<endl;//获得特定时间间隔的采样点
+  std::cout<< "getSamples "<<point_set.size()<<std::endl;//获得特定时间间隔的采样点
 
   Eigen::MatrixXd ctrl_pts;
   NonUniformBspline::parameterizeToBspline(ts, point_set, start_end_derivatives, ctrl_pts);
   NonUniformBspline init(ctrl_pts, 3, ts);//control_points=2+point_set  控制点，3阶次，时间间隔ts
   //打印输出ctrl_pts
-  cout<<ts<<endl;
+  std::cout<<ts<<std::endl;
   
-  cout << "path2Bspline ctrl_pts: " << ctrl_pts.rows() << "*" << ctrl_pts.cols() << endl;
+  std::cout << "path2Bspline ctrl_pts: " << ctrl_pts.rows() << "*" << ctrl_pts.cols() << std::endl;
   // bspline trajectory optimization
 
   t1 = ros::Time::now();
@@ -205,7 +205,7 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
   }
   //逐行打印输出ctrl_pts
   for(int i=0;i<ctrl_pts.rows();i++){
-    cout << "ctrl_pts "<<i<<": " << ctrl_pts.row(i)<< endl;
+    std::cout << "ctrl_pts "<<i<<": " << ctrl_pts.row(i)<< std::endl;
   }
   //优化轨迹  //输入是 控制点n*3，时间间隔，costfunction 和
   
@@ -214,7 +214,7 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
 
   //逐行打印输出ctrl_pts
   for(int i=0;i<ctrl_pts.rows();i++){
-    cout << "opt_ctrl_pts "<<i<<": " << ctrl_pts.row(i)<< endl;
+    std::cout << "opt_ctrl_pts "<<i<<": " << ctrl_pts.row(i)<< std::endl;
   }
   t_opt = (ros::Time::now() - t1).toSec();
 
@@ -223,7 +223,7 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
   t1                    = ros::Time::now();
   NonUniformBspline pos = NonUniformBspline(ctrl_pts, 3, ts);
   for(int i=0;i<ctrl_pts.rows();i++){
-    cout << "NonUniformBspline_ctrl_pts "<<i<<": " << ctrl_pts.row(i)<< endl;
+    std::cout << "NonUniformBspline_ctrl_pts "<<i<<": " << ctrl_pts.row(i)<< std::endl;
   }
   t_opt = (ros::Time::now() - t1).toSec();
 
@@ -241,11 +241,11 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
   }
 
   // pos.checkFeasibility(true);
-  // cout << "[Main]: iter num: " << iter_num << endl;
+  // std::cout << "[Main]: iter num: " << iter_num << std::endl;
 
   double tn = pos.getTimeSum();
 
-  cout << "[kino replan]: Reallocate ratio: " << tn / to << endl;
+  std::cout << "[kino replan]: Reallocate ratio: " << tn / to << std::endl;
   if (tn / to > 3.0) ROS_ERROR("reallocate error.");
 
   t_adjust = (ros::Time::now() - t1).toSec();
@@ -255,8 +255,8 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
   local_data_.position_traj_ = pos;
 
   double t_total = t_search + t_opt + t_adjust;
-  cout << "[kino replan]: time: " << t_total << ", search: " << t_search << ", optimize: " << t_opt
-       << ", adjust time:" << t_adjust << endl;
+  std::cout << "[kino replan]: time: " << t_total << ", search: " << t_search << ", optimize: " << t_opt
+       << ", adjust time:" << t_adjust << std::endl;
 
   pp_.time_search_   = t_search;
   pp_.time_optimize_ = t_opt;
@@ -274,28 +274,28 @@ void FastPlannerManager::getVelAndAcc(const NonUniformBspline& pos){
   vel = position.getDerivative();
   acc = vel.getDerivative();
   // //分别打印输出
-  // cout<<"method 1"<<endl;
-  // cout<<"position"<<endl;
+  // std::cout<<"method 1"<<std::endl;
+  // std::cout<<"position"<<std::endl;
   // Eigen::MatrixXd tep_pos;
   // tep_pos = position.getControlPoint();
   // for(int i=0;i<tep_pos.rows();i++){
-  //   cout << "position "<<i<<": " << tep_pos.row(i)<< endl;
+  //   std::cout << "position "<<i<<": " << tep_pos.row(i)<< std::endl;
   // }
-  // cout<<"vel"<<endl;
+  // std::cout<<"vel"<<std::endl;
   // Eigen::MatrixXd tep_vel;
   // tep_vel = vel.getControlPoint();
   // for(int i=0;i<tep_vel.rows();i++){
-  //   cout << "vel "<<i<<": " << tep_vel.row(i)<< endl;
+  //   std::cout << "vel "<<i<<": " << tep_vel.row(i)<< std::endl;
   // }
-  // cout<<"acc"<<endl;
+  // std::cout<<"acc"<<std::endl;
   // Eigen::MatrixXd tep_acc;
   // tep_acc = acc.getControlPoint();
   // for(int i=0;i<tep_acc.rows();i++){
-  //   cout << "acc "<<i<<": " << tep_acc.row(i)<< endl;
+  //   std::cout << "acc "<<i<<": " << tep_acc.row(i)<< std::endl;
   // }
 
   //方法2
-  cout<<"method 2"<<endl;
+  std::cout<<"method 2"<<std::endl;
 
   Eigen::MatrixXd position_vector,vel_vector,acc_vector;
   double internal = position.getInterval();
@@ -338,17 +338,17 @@ void FastPlannerManager::getVelAndAcc(const NonUniformBspline& pos){
 
 
   // //分别打印输出
-  // cout << "position_vector: " << endl;
+  // std::cout << "position_vector: " << std::endl;
   // for(int i=0;i<point_num;i++){
-  //   cout << "position_vector "<<i<<": " << position_vector.row(i)<< endl;
+  //   std::cout << "position_vector "<<i<<": " << position_vector.row(i)<< std::endl;
   // }
-  // cout << "vel_vector: " << endl;
+  // std::cout << "vel_vector: " << std::endl;
   // for(int i=0;i<point_num;i++){
-  //   cout << "vel_vector "<<i<<": " << vel_vector.row(i)<< endl;
+  //   std::cout << "vel_vector "<<i<<": " << vel_vector.row(i)<< std::endl;
   // }
-  // cout << "acc_vector: " << endl;
+  // std::cout << "acc_vector: " << std::endl;
   // for(int i=0;i<point_num;i++){
-  //   cout << "acc_vector "<<i<<": " << acc_vector.row(i)<< endl;
+  //   std::cout << "acc_vector "<<i<<": " << acc_vector.row(i)<< std::endl;
   // }
 }
 
@@ -491,7 +491,7 @@ bool FastPlannerManager::topoReplan(bool collide) {
       for (int i = 0; i < select_paths.size(); ++i) optimize_threads[i].join();
 
       double t_opt = (ros::Time::now() - t1).toSec();
-      cout << "[planner]: optimization time: " << t_opt << endl;
+      std::cout << "[planner]: optimization time: " << t_opt << std::endl;
       selectBestTraj(best_traj);
       refineTraj(best_traj, time_inc);
 
@@ -630,7 +630,7 @@ Eigen::MatrixXd FastPlannerManager::reparamLocalTraj(double start_t, double& dt,
   Eigen::MatrixXd ctrl_pts;
   NonUniformBspline::parameterizeToBspline(dt, point_set, start_end_derivative, ctrl_pts);
   plan_data_.local_start_end_derivative_ = start_end_derivative;
-  // cout << "ctrl pts:" << ctrl_pts.rows() << endl;
+  // std::cout << "ctrl pts:" << ctrl_pts.rows() << std::endl;
 
   return ctrl_pts;
 }
@@ -646,7 +646,7 @@ Eigen::MatrixXd FastPlannerManager::reparamLocalTraj(double start_t, double dura
   /* parameterization of B-spline */
   Eigen::MatrixXd ctrl_pts;
   NonUniformBspline::parameterizeToBspline(dt, point_set, start_end_derivative, ctrl_pts);
-  // cout << "ctrl pts:" << ctrl_pts.rows() << endl;
+  // std::cout << "ctrl pts:" << ctrl_pts.rows() << std::endl;
 
   return ctrl_pts;
 }

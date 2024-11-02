@@ -116,7 +116,7 @@ Eigen::MatrixXd BsplineOptimizer::BsplineOptimizeTraj(const Eigen::MatrixXd& poi
   setControlPoints(points);
   setBsplineInterval(ts);
   // setCostFunction(cost_function);
-    // setTerminateCond(max_num_id, max_time_id);
+  // setTerminateCond(max_num_id, max_time_id);
 
   // optimize();
   return this->control_points_;
@@ -580,7 +580,6 @@ bool BsplineOptimizer::BsplineOptimizeTrajRebound(Eigen::MatrixXd &optimal_point
       lbfgs::lbfgs_load_default_parameters(&lbfgs_params);
       lbfgs_params.mem_size = 16;
       lbfgs_params.max_iterations = 200;
-
       lbfgs_params.g_epsilon = 0.01;
 
       /* ---------- optimize ---------- */
@@ -634,7 +633,7 @@ bool BsplineOptimizer::BsplineOptimizeTrajRebound(Eigen::MatrixXd &optimal_point
     calcSmoothnessCost(cps_.points, f_smoothness, g_smoothness);// 计算平滑度代价和梯度
     calcDistanceCostRebound(cps_.points, f_distance, g_distance, iter_num_, f_smoothness);// 计算距离代价和梯度
     calcFeasibilityCost(cps_.points, f_feasibility, g_feasibility);// 计算可行性代价和梯度
-    calcSwingCost(cps_.points, f_swing, g_swing);// 计算可行性代价和梯度
+    //calcSwingCost(cps_.points, f_swing, g_swing);// 计算可行性代价和梯度
     // 组合成最终的代价函数值  
     lambda1_ = 1;
     new_lambda2_ = 1;
@@ -969,8 +968,8 @@ bool BsplineOptimizer::BsplineOptimizeTrajRebound(Eigen::MatrixXd &optimal_point
  //计算摆角代价，对应
   void BsplineOptimizer::calcSwingCost(const Eigen::MatrixXd &q, double &cost, Eigen::MatrixXd &gradient){// 计算可行性代价和梯度
     cost = 0.0;//初始化cost = 0
-    //1. 由q计算各点的速度和加速度
     std::cout << "calcSwingCost" << std::endl;
+    //1. 由q计算各点的速度和加速度
     int point_num = q.cols();
     Eigen::MatrixXd v(3, point_num);//速度矩阵
     Eigen::MatrixXd a(3, point_num);//加速度矩阵
@@ -1052,4 +1051,4 @@ bool BsplineOptimizer::BsplineOptimizeTrajRebound(Eigen::MatrixXd &optimal_point
     return (opt->force_stop_type_ == STOP_FOR_ERROR || opt->force_stop_type_ == STOP_FOR_REBOUND);
   }
   
-}  // namespace fast_planner```
+}  // namespace fast_planner

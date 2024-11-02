@@ -6,5 +6,11 @@
     "python.analysis.extraPaths": [
         "/home/zawubuntu/code/my_code/devel/lib/python3/dist-packages",
         "/opt/ros/noetic/lib/python3/dist-packages"
-    ]
+    ],
+    "files.associations": {
+        "*.h": "cpp",
+        "*.tcc": "cpp",
+        "algorithm": "cpp",
+        "core": "cpp"
+    }
 }

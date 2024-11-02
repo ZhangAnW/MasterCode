@@ -33,6 +33,7 @@ void TopoReplanFSM::init(ros::NodeHandle& nh) {
   exec_state_  = FSM_EXEC_STATE::INIT;
   have_target_ = false;
   collide_     = false;
+  ROS_INFO("TopoReplanFSM: Initialize the fast planner.");
 
   /*  fsm param  */
   nh.param("fsm/flight_type", target_type_, -1);

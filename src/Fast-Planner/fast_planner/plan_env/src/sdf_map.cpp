@@ -30,6 +30,7 @@
 
 void SDFMap::initMap(ros::NodeHandle& nh) {
   node_ = nh;
+  std::cout << "init map" << std::endl;
 
   /* get parameter */
   double x_size, y_size, z_size;
@@ -1042,8 +1043,8 @@ void SDFMap::publishMapInflate(bool all_info) {
 
   boundIndex(min_cut);
   boundIndex(max_cut);
-  ROS_WARN("min_cut: %d %d %d, max_cut: %d %d %d",min_cut(0),min_cut(1),min_cut(2),max_cut(0),max_cut(1),max_cut(2));
-  cout<<min_cut<<max_cut<<endl;
+  // ROS_WARN("min_cut: %d %d %d, max_cut: %d %d %d",min_cut(0),min_cut(1),min_cut(2),max_cut(0),max_cut(1),max_cut(2));
+  // cout<<min_cut<<max_cut<<endl;
   // for (int x = min_cut(0); x <= max_cut(0); ++x)
   //   for (int y = min_cut(1); y <= max_cut(1); ++y)
   //     for (int z = min_cut(2); z <= max_cut(2); ++z) {

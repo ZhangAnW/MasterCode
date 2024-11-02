@@ -34,6 +34,7 @@ void KinoReplanFSM::init(ros::NodeHandle& nh) {
   have_target_ = false;
   have_odom_   = false;
 
+  ROS_INFO("KinoReplanFSM: Initialize the fast planner.");
   /*  fsm param  */
   nh.param("fsm/flight_type", target_type_, -1);
   nh.param("fsm/thresh_replan", replan_thresh_, -1.0);
