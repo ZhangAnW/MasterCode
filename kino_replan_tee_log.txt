@@ -1,0 +1,195 @@
+... logging to /home/zawubuntu/.ros/log/8e74bd4c-bcef-11ef-9b67-efce7f066095/roslaunch-zawubuntu-9325.log
+Checking log directory for disk usage. This may take a while.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+]2;/home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/plan_manage/launch/kino_replan.launch
+[1mstarted roslaunch server http://zawubuntu:46235/[0m
+
+SUMMARY
+========
+
+PARAMETERS
+ * /fast_planner_node/bspline/limit_acc: 2.0
+ * /fast_planner_node/bspline/limit_ratio: 1.1
+ * /fast_planner_node/bspline/limit_vel: 3.0
+ * /fast_planner_node/fsm/flight_type: 1
+ * /fast_planner_node/fsm/thresh_no_replan: 2.0
+ * /fast_planner_node/fsm/thresh_replan: 1.5
+ * /fast_planner_node/fsm/waypoint0_x: 19.0
+ * /fast_planner_node/fsm/waypoint0_y: 0.0
+ * /fast_planner_node/fsm/waypoint0_z: 1.0
+ * /fast_planner_node/fsm/waypoint1_x: -19.0
+ * /fast_planner_node/fsm/waypoint1_y: 0.0
+ * /fast_planner_node/fsm/waypoint1_z: 1.0
+ * /fast_planner_node/fsm/waypoint2_x: 0.0
+ * /fast_planner_node/fsm/waypoint2_y: 19.0
+ * /fast_planner_node/fsm/waypoint2_z: 1.0
+ * /fast_planner_node/fsm/waypoint_num: 2
+ * /fast_planner_node/manager/clearance_threshold: 0.2
+ * /fast_planner_node/manager/control_points_distance: 0.5
+ * /fast_planner_node/manager/dynamic_environment: 0
+ * /fast_planner_node/manager/local_segment_length: 6.0
+ * /fast_planner_node/manager/max_acc: 2.0
+ * /fast_planner_node/manager/max_jerk: 4.0
+ * /fast_planner_node/manager/max_vel: 3.0
+ * /fast_planner_node/manager/use_geometric_path: False
+ * /fast_planner_node/manager/use_kinodynamic_path: True
+ * /fast_planner_node/manager/use_optimization: True
+ * /fast_planner_node/manager/use_topo_path: False
+ * /fast_planner_node/optimization/algorithm1: 15
+ * /fast_planner_node/optimization/algorithm2: 11
+ * /fast_planner_node/optimization/dist0: 0.4
+ * /fast_planner_node/optimization/lambda1: 10.0
+ * /fast_planner_node/optimization/lambda2: 5.0
+ * /fast_planner_node/optimization/lambda3: 1e-05
+ * /fast_planner_node/optimization/lambda4: 0.01
+ * /fast_planner_node/optimization/lambda7: 100.0
+ * /fast_planner_node/optimization/max_acc: 2.0
+ * /fast_planner_node/optimization/max_iteration_num1: 2
+ * /fast_planner_node/optimization/max_iteration_num2: 300
+ * /fast_planner_node/optimization/max_iteration_num3: 200
+ * /fast_planner_node/optimization/max_iteration_num4: 200
+ * /fast_planner_node/optimization/max_iteration_time1: 0.0001
+ * /fast_planner_node/optimization/max_iteration_time2: 0.005
+ * /fast_planner_node/optimization/max_iteration_time3: 0.003
+ * /fast_planner_node/optimization/max_iteration_time4: 0.003
+ * /fast_planner_node/optimization/max_vel: 3.0
+ * /fast_planner_node/optimization/order: 3
+ * /fast_planner_node/planner_node/planner: 1
+ * /fast_planner_node/sdf_map/cx: 321.04638671875
+ * /fast_planner_node/sdf_map/cy: 243.44969177246094
+ * /fast_planner_node/sdf_map/depth_filter_margin: 2
+ * /fast_planner_node/sdf_map/depth_filter_maxdist: 5.0
+ * /fast_planner_node/sdf_map/depth_filter_mindist: 0.2
+ * /fast_planner_node/sdf_map/depth_filter_tolerance: 0.15
+ * /fast_planner_node/sdf_map/esdf_slice_height: 0.3
+ * /fast_planner_node/sdf_map/frame_id: world
+ * /fast_planner_node/sdf_map/fx: 387.229248046875
+ * /fast_planner_node/sdf_map/fy: 387.229248046875
+ * /fast_planner_node/sdf_map/ground_height: -1.0
+ * /fast_planner_node/sdf_map/k_depth_scaling_factor: 1000.0
+ * /fast_planner_node/sdf_map/local_bound_inflate: 0.0
+ * /fast_planner_node/sdf_map/local_map_margin: 50
+ * /fast_planner_node/sdf_map/local_update_range_x: 5.5
+ * /fast_planner_node/sdf_map/local_update_range_y: 5.5
+ * /fast_planner_node/sdf_map/local_update_range_z: 4.5
+ * /fast_planner_node/sdf_map/map_size_x: 40.0
+ * /fast_planner_node/sdf_map/map_size_y: 20.0
+ * /fast_planner_node/sdf_map/map_size_z: 5.0
+ * /fast_planner_node/sdf_map/max_ray_length: 4.5
+ * /fast_planner_node/sdf_map/min_ray_length: 0.5
+ * /fast_planner_node/sdf_map/obstacles_inflation: 0.099
+ * /fast_planner_node/sdf_map/p_hit: 0.65
+ * /fast_planner_node/sdf_map/p_max: 0.9
+ * /fast_planner_node/sdf_map/p_min: 0.12
+ * /fast_planner_node/sdf_map/p_miss: 0.35
+ * /fast_planner_node/sdf_map/p_occ: 0.8
+ * /fast_planner_node/sdf_map/pose_type: 1
+ * /fast_planner_node/sdf_map/resolution: 0.1
+ * /fast_planner_node/sdf_map/show_esdf_time: False
+ * /fast_planner_node/sdf_map/show_occ_time: False
+ * /fast_planner_node/sdf_map/skip_pixel: 2
+ * /fast_planner_node/sdf_map/use_depth_filter: True
+ * /fast_planner_node/sdf_map/virtual_ceil_height: 2.5
+ * /fast_planner_node/sdf_map/visualization_truncate_height: 2.49
+ * /fast_planner_node/search/allocate_num: 100000
+ * /fast_planner_node/search/check_num: 5
+ * /fast_planner_node/search/horizon: 7.0
+ * /fast_planner_node/search/init_max_tau: 0.8
+ * /fast_planner_node/search/lambda_heu: 5.0
+ * /fast_planner_node/search/margin: 0.2
+ * /fast_planner_node/search/max_acc: 2.0
+ * /fast_planner_node/search/max_tau: 0.6
+ * /fast_planner_node/search/max_vel: 3.0
+ * /fast_planner_node/search/resolution_astar: 0.1
+ * /fast_planner_node/search/time_resolution: 0.8
+ * /fast_planner_node/search/w_time: 10.0
+ * /odom_visualization/color/a: 1.0
+ * /odom_visualization/color/b: 1.0
+ * /odom_visualization/color/g: 0.0
+ * /odom_visualization/color/r: 0.0
+ * /odom_visualization/covariance_scale: 100.0
+ * /odom_visualization/robot_scale: 1.0
+ * /pcl_render_node/cam_cx: 321.04638671875
+ * /pcl_render_node/cam_cy: 243.44969177246094
+ * /pcl_render_node/cam_fx: 387.229248046875
+ * /pcl_render_node/cam_fy: 387.229248046875
+ * /pcl_render_node/cam_height: 480
+ * /pcl_render_node/cam_width: 640
+ * /pcl_render_node/estimation_rate: 30.0
+ * /pcl_render_node/map/x_size: 40.0
+ * /pcl_render_node/map/y_size: 20.0
+ * /pcl_render_node/map/z_size: 5.0
+ * /pcl_render_node/sensing_horizon: 5.0
+ * /pcl_render_node/sensing_rate: 30.0
+ * /quadrotor_simulator_so3/rate/odom: 200.0
+ * /quadrotor_simulator_so3/simulator/init_state_x: -19.0
+ * /quadrotor_simulator_so3/simulator/init_state_y: -0.0
+ * /quadrotor_simulator_so3/simulator/init_state_z: 1.0
+ * /random_forest/ObstacleShape/lower_hei: 0.0
+ * /random_forest/ObstacleShape/lower_rad: 0.5
+ * /random_forest/ObstacleShape/radius_h: 0.5
+ * /random_forest/ObstacleShape/radius_l: 0.7
+ * /random_forest/ObstacleShape/seed: -1
+ * /random_forest/ObstacleShape/theta: 0.5
+ * /random_forest/ObstacleShape/upper_hei: 3.0
+ * /random_forest/ObstacleShape/upper_rad: 0.7
+ * /random_forest/ObstacleShape/z_h: 0.8
+ * /random_forest/ObstacleShape/z_l: 0.7
+ * /random_forest/init_state_x: -19.0
+ * /random_forest/init_state_y: -0.0
+ * /random_forest/map/circle_num: 10
+ * /random_forest/map/obs_num: 150
+ * /random_forest/map/resolution: 0.1
+ * /random_forest/map/x_size: 40.0
+ * /random_forest/map/y_size: 20.0
+ * /random_forest/map/z_size: 5.0
+ * /random_forest/sensing/radius: 5.0
+ * /random_forest/sensing/rate: 10.0
+ * /rosdistro: noetic
+ * /rosversion: 1.17.0
+ * /so3_control/corrections/p: 0.0
+ * /so3_control/corrections/r: 0.0
+ * /so3_control/corrections/z: 0.0
+ * /so3_control/gains/ang/x: 0.07
+ * /so3_control/gains/ang/y: 0.07
+ * /so3_control/gains/ang/z: 0.1
+ * /so3_control/gains/pos/x: 2.0
+ * /so3_control/gains/pos/y: 2.0
+ * /so3_control/gains/pos/z: 3.5
+ * /so3_control/gains/rot/x: 1.0
+ * /so3_control/gains/rot/y: 1.0
+ * /so3_control/gains/rot/z: 1.0
+ * /so3_control/gains/vel/x: 1.8
+ * /so3_control/gains/vel/y: 1.8
+ * /so3_control/gains/vel/z: 2.0
+ * /so3_control/mass: 0.74
+ * /so3_control/use_angle_corrections: False
+ * /so3_control/use_external_yaw: False
+ * /traj_server/traj_server/time_forward: 1.5
+ * /waypoint_generator/waypoint_type: manual-lonely-way...
+
+NODES
+  /
+    fast_planner_node (plan_manage/fast_planner_node)
+    odom_visualization (odom_visualization/odom_visualization)
+    pcl_render_node (local_sensing_node/pcl_render_node)
+    quadrotor_simulator_so3 (so3_quadrotor_simulator/quadrotor_simulator_so3)
+    random_forest (map_generator/random_forest)
+    so3_control (nodelet/nodelet)
+    so3_disturbance_generator (so3_disturbance_generator/so3_disturbance_generator)
+    traj_server (plan_manage/traj_server)
+    waypoint_generator (waypoint_generator/waypoint_generator)
+
+[0m[ INFO] [1734492284.312722212]: KinoReplanFSM: Initialize the fast planner.[0m
+init map
+hit: 0.619039
+miss: -0.619039
+min log: -1.99243
+max: 2.19722
+thresh log: 1.38629
+origin_: -20 -10  -1
+map size: 40 20  5
+[FSM]: from INIT to WAIT_TARGET
+[FSM]: state: WAIT_TARGET
+[FSM]: state: WAIT_TARGET

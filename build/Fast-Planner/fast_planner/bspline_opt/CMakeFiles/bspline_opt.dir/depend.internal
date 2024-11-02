@@ -3,6 +3,7 @@
 
 Fast-Planner/fast_planner/bspline_opt/CMakeFiles/bspline_opt.dir/src/bspline_optimizer.cpp.o
  /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/bspline_opt/include/bspline_opt/bspline_optimizer.h
+ /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/bspline_opt/include/bspline_opt/lbfgs.hpp
  /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/bspline_opt/src/bspline_optimizer.cpp
  /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/plan_env/include/plan_env/edt_environment.h
  /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/plan_env/include/plan_env/obj_predictor.h

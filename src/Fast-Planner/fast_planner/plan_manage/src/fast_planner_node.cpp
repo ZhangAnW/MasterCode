@@ -42,7 +42,6 @@ int main(int argc, char** argv) {
 
   int planner;
   nh.param("planner_node/planner", planner, -1);
-  planner =1;
   TopoReplanFSM topo_replan;
   KinoReplanFSM kino_replan;
 

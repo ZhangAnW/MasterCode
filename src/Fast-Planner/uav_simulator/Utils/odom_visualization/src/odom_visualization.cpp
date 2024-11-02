@@ -353,7 +353,7 @@ void odom_callback(const nav_msgs::Odometry::ConstPtr& msg)
   meshROS.color.g = color_g;
   meshROS.color.b = color_b;
   meshROS.mesh_resource = mesh_resource;
-  meshPub.publish(meshROS);                                                  
+  meshPub.publish(meshROS);    //这里是无人机                                              
 
   // TF for raw sensor visualization
   if (tf45)

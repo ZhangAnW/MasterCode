@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+/build/Fast-Planner
+/devel
+/build
+kino_replan_tee_log.txt

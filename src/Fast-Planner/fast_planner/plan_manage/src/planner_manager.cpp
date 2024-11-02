@@ -133,19 +133,17 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
        << "\ngoal:" 
        << end_pt.transpose() << ", " << end_vel.transpose()
        << std::endl;
-
+  //起点和终点距离小于0.2
   if ((start_pt - end_pt).norm() < 0.2) {
     std::cout << "Close goal" << std::endl;
     return false;
   }
-
   ros::Time t1, t2;
 
   local_data_.start_time_ = ros::Time::now();
   double t_search = 0.0, t_opt = 0.0, t_adjust = 0.0;
 
   // kinodynamic path searching
-
   t1 = ros::Time::now();
 
   kino_path_finder_->reset();
@@ -171,11 +169,9 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
     std::cout << "[kino replan]: kinodynamic search success." << std::endl;
   }
 
-  plan_data_.kino_path_ = kino_path_finder_->getKinoTraj(0.01);//获得轨迹。3*n
-  std::cout<< "getKinoTraj kino_path_ "<<plan_data_.kino_path_.size()<<std::endl;
-  //打印kino_path_的起点和终点
-  std::cout << "kino_path_ start: " << plan_data_.kino_path_.front().transpose() << std::endl;
-  std::cout << "kino_path_ end: " << plan_data_.kino_path_.back().transpose() << std::endl;
+  plan_data_.kino_path_ = kino_path_finder_->getKinoTraj(0.01);//获得轨迹，维度3*n
+  std::cout<< "getKinoTraj kino_path_ "<<plan_data_.kino_path_.size()<<std::endl;//获得轨迹点的个数
+
   t_search = (ros::Time::now() - t1).toSec();
 
   // parameterize the path to bspline
@@ -184,31 +180,38 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
   vector<Eigen::Vector3d> point_set, start_end_derivatives;
   //获得特定时间间隔的采样点并更新ts间隔时间
   kino_path_finder_->getSamples(ts, point_set, start_end_derivatives);
-
-  std::cout<< "getSamples "<<point_set.size()<<std::endl;//获得特定时间间隔的采样点
+  //打印kino_path_的起点和终点
+  std::cout << "kino_path_ start: " << plan_data_.kino_path_.front().transpose() << std::endl;
+  std::cout << "kino_path_ end: " << plan_data_.kino_path_.back().transpose() << std::endl;
+  std::cout<< "getSamples "<<point_set.size()<<std::endl;//获得特定时间间隔的采样点个数
+  //打印point_set的起点和终点
+  std::cout << "point_set start: " << point_set.front().transpose() << std::endl;
+  std::cout << "point_set end: " << point_set.back().transpose() << std::endl;
+  //打印start_end_derivatives的四个点
+  std::cout << "start vel: " << start_end_derivatives[0].transpose() << std::endl;
+  std::cout << "end vel: " << start_end_derivatives[1].transpose() << std::endl;
+  std::cout << "start acc: " << start_end_derivatives[2].transpose() << std::endl;
+  std::cout << "end acc: " << start_end_derivatives[3].transpose() << std::endl;
 
   Eigen::MatrixXd ctrl_pts;
   NonUniformBspline::parameterizeToBspline(ts, point_set, start_end_derivatives, ctrl_pts);
   NonUniformBspline init(ctrl_pts, 3, ts);//control_points=2+point_set  控制点，3阶次，时间间隔ts
-  //打印输出ctrl_pts
-  std::cout<<ts<<std::endl;
+  // //打印输出ctrl_pts 时间间隔
+  // std::cout<<ts<<std::endl;
   
   std::cout << "path2Bspline ctrl_pts: " << ctrl_pts.rows() << "*" << ctrl_pts.cols() << std::endl;
   // bspline trajectory optimization
 
   t1 = ros::Time::now();
-
-  int cost_function = BsplineOptimizer::NORMAL_PHASE;
-
-  if (status != KinodynamicAstar::REACH_END) {
-    cost_function |= BsplineOptimizer::ENDPOINT;
-  }
   //逐行打印输出ctrl_pts
   for(int i=0;i<ctrl_pts.rows();i++){
     std::cout << "ctrl_pts "<<i<<": " << ctrl_pts.row(i)<< std::endl;
   }
   //优化轨迹  //输入是 控制点n*3，时间间隔，costfunction 和
-  
+  // int cost_function = BsplineOptimizer::NORMAL_PHASE;
+  // if (status != KinodynamicAstar::REACH_END) {
+  //   cost_function |= BsplineOptimizer::ENDPOINT;
+  // }
   // ctrl_pts = bspline_optimizers_[0]->BsplineOptimizeTraj(ctrl_pts, ts, cost_function, 1, 1);
   bool flag_step_1_success = bspline_optimizers_[0]->BsplineOptimizeTrajRebound(ctrl_pts, ts);
 
@@ -261,97 +264,100 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
   pp_.time_search_   = t_search;
   pp_.time_optimize_ = t_opt;
   pp_.time_adjust_   = t_adjust;
-  // getVelAndAcc(pos);//获得速度和加速度，以及四旋翼轨迹
+  getVelAndAcc(pos);//获得速度和加速度，以及四旋翼轨迹
   updateTrajInfo();
   
   return true;
 }
 
-void FastPlannerManager::getVelAndAcc(const NonUniformBspline& pos){
-  //方法1
-  NonUniformBspline position,vel, acc;
-  position = pos;
-  vel = position.getDerivative();
-  acc = vel.getDerivative();
-  // //分别打印输出
-  // std::cout<<"method 1"<<std::endl;
-  // std::cout<<"position"<<std::endl;
-  // Eigen::MatrixXd tep_pos;
-  // tep_pos = position.getControlPoint();
-  // for(int i=0;i<tep_pos.rows();i++){
-  //   std::cout << "position "<<i<<": " << tep_pos.row(i)<< std::endl;
-  // }
-  // std::cout<<"vel"<<std::endl;
-  // Eigen::MatrixXd tep_vel;
-  // tep_vel = vel.getControlPoint();
-  // for(int i=0;i<tep_vel.rows();i++){
-  //   std::cout << "vel "<<i<<": " << tep_vel.row(i)<< std::endl;
-  // }
-  // std::cout<<"acc"<<std::endl;
-  // Eigen::MatrixXd tep_acc;
-  // tep_acc = acc.getControlPoint();
-  // for(int i=0;i<tep_acc.rows();i++){
-  //   std::cout << "acc "<<i<<": " << tep_acc.row(i)<< std::endl;
-  // }
+// 方法实现
+void FastPlannerManager::getVelAndAcc(const NonUniformBspline& pos) {
+    // 方法1
+    NonUniformBspline position, vel, acc;
+    position = pos;
+    vel = position.getDerivative();
+    acc = vel.getDerivative();
 
-  //方法2
-  std::cout<<"method 2"<<std::endl;
-
-  Eigen::MatrixXd position_vector,vel_vector,acc_vector;
-  double internal = position.getInterval();
-  position_vector = position.getControlPoint();
-  int point_num = position_vector.rows();
-  //计算速度和加速度
-  vel_vector.resize(point_num,3);
-  acc_vector.resize(point_num,3);
-  for(int i=0;i<point_num;i++){
-    if (i==0||i==point_num-1){//起点
-      vel_vector.row(i).setZero();
-    }else{
-      vel_vector.row(i) = (position_vector.row(i+1)-position_vector.row(i))/internal;
+    // 分别打印输出方法1的结果
+    std::cout << "method 1" << std::endl;
+    std::cout << "position" << std::endl;
+    Eigen::MatrixXd tep_pos;
+    tep_pos = position.getControlPoint();
+    for (int i = 0; i < tep_pos.rows(); i++) {
+        std::cout << "position " << i << ": " << tep_pos.row(i) << std::endl;
     }
-  }
-  for(int i=0;i<point_num;i++){
-    if (i==0||i==point_num-1){//起点终点
-      acc_vector.row(i) = Eigen::Vector3d(0, 0, 0);
-    }else{
-      acc_vector.row(i) = (vel_vector.row(i+1)-vel_vector.row(i))/internal;
+    std::cout << "vel" << std::endl;
+    Eigen::MatrixXd tep_vel;
+    tep_vel = vel.getControlPoint();
+    for (int i = 0; i < tep_vel.rows(); i++) {
+        std::cout << "vel " << i << ": " << tep_vel.row(i) << std::endl;
     }
-  }
+    std::cout << "acc" << std::endl;
+    Eigen::MatrixXd tep_acc;
+    tep_acc = acc.getControlPoint();
+    for (int i = 0; i < tep_acc.rows(); i++) {
+        std::cout << "acc " << i << ": " << tep_acc.row(i) << std::endl;
+    }
 
-  int length = 0.25;//绳长度
-  //计算摆角向量
-  Eigen::MatrixXd swing_q(point_num, 3);  
-  Eigen::Vector3d gravity_vector(0, 0, 9.8);
+    // 方法2
+    std::cout << "method 2" << std::endl;
 
-  for (int i = 0; i < point_num; i++) {  
-      Eigen::Vector3d direction = -acc_vector.row(i);  //报错
-      direction += gravity_vector;
-      swing_q.row(i) = direction.normalized();  
-  }
-  //计算四旋翼坐标
-  Eigen::MatrixXd postion_Q_vec(point_num,3);
-  
-  for(int i=0;i<point_num;i++){
-    postion_Q_vec.row(i) = position_vector.row(i)-length*swing_q.row(i);
-  }
+    Eigen::MatrixXd position_vector, vel_vector, acc_vector;
+    double internal = position.getInterval();
+    position_vector = position.getControlPoint();
+    int point_num = position_vector.rows();
 
+    // 计算速度和加速度
+    vel_vector.resize(point_num, 3);
+    acc_vector.resize(point_num, 3);
+    for (int i = 0; i < point_num; i++) {
+        if (i == 0 || i == point_num - 1) {  // 起点
+            vel_vector.row(i).setZero();
+        }
+        else {
+            vel_vector.row(i) = (position_vector.row(i + 1) - position_vector.row(i)) / internal;
+        }
+    }
+    for (int i = 0; i < point_num; i++) {
+        if (i == 0 || i == point_num - 1) {  // 起点终点
+            acc_vector.row(i) = Eigen::Vector3d(0, 0, 0);
+        }
+        else {
+            acc_vector.row(i) = (vel_vector.row(i + 1) - vel_vector.row(i)) / internal;
+        }
+    }
 
-  // //分别打印输出
-  // std::cout << "position_vector: " << std::endl;
-  // for(int i=0;i<point_num;i++){
-  //   std::cout << "position_vector "<<i<<": " << position_vector.row(i)<< std::endl;
-  // }
-  // std::cout << "vel_vector: " << std::endl;
-  // for(int i=0;i<point_num;i++){
-  //   std::cout << "vel_vector "<<i<<": " << vel_vector.row(i)<< std::endl;
-  // }
-  // std::cout << "acc_vector: " << std::endl;
-  // for(int i=0;i<point_num;i++){
-  //   std::cout << "acc_vector "<<i<<": " << acc_vector.row(i)<< std::endl;
-  // }
+    // int length = 0.25;  // 绳长度
+    // // 计算摆角向量
+    // Eigen::MatrixXd swing_q(point_num, 3);
+    // Eigen::Vector3d gravity_vector(0, 0, 9.8);
+
+    // for (int i = 0; i < point_num; i++) {
+    //     Eigen::Vector3d direction = -acc_vector.row(i);  // 报错
+    //     direction += gravity_vector;
+    //     swing_q.row(i) = direction.normalized();
+    // }
+    // // 计算四旋翼坐标
+    // Eigen::MatrixXd postion_Q_vec(point_num, 3);
+
+    // for (int i = 0; i < point_num; i++) {
+    //     postion_Q_vec.row(i) = position_vector.row(i) - length * swing_q.row(i);
+    // }
+
+    // 分别打印输出方法2的结果
+    std::cout << "position_vector: " << std::endl;
+    for (int i = 0; i < point_num; i++) {
+        std::cout << "position_vector " << i << ": " << position_vector.row(i) << std::endl;
+    }
+    std::cout << "vel_vector: " << std::endl;
+    for (int i = 0; i < point_num; i++) {
+        std::cout << "vel_vector " << i << ": " << vel_vector.row(i) << std::endl;
+    }
+    std::cout << "acc_vector: " << std::endl;
+    for (int i = 0; i < point_num; i++) {
+        std::cout << "acc_vector " << i << ": " << acc_vector.row(i) << std::endl;
+    }
 }
-
 
 // !SECTION
 

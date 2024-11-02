@@ -92,6 +92,7 @@ void displayTrajWithColor(vector<Eigen::Vector3d> path, double resolution, Eigen
   ros::Duration(0.001).sleep();
 }
 
+
 void drawCmd(const Eigen::Vector3d& pos, const Eigen::Vector3d& vec, const int& id,
              const Eigen::Vector4d& color) {
   visualization_msgs::Marker mk_state;

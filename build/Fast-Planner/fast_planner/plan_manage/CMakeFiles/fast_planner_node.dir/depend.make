@@ -4,6 +4,7 @@
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/fast_planner_node.cpp.o: /home/zawubuntu/code/my_code/devel/include/plan_manage/Bspline.h
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/fast_planner_node.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/bspline/include/bspline/non_uniform_bspline.h
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/fast_planner_node.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/bspline_opt/include/bspline_opt/bspline_optimizer.h
+Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/fast_planner_node.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/bspline_opt/include/bspline_opt/lbfgs.hpp
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/fast_planner_node.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/path_searching/include/path_searching/astar.h
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/fast_planner_node.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/path_searching/include/path_searching/kinodynamic_astar.h
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/fast_planner_node.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/path_searching/include/path_searching/topo_prm.h
@@ -566,6 +567,7 @@ Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/fast_
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/kino_replan_fsm.cpp.o: /home/zawubuntu/code/my_code/devel/include/plan_manage/Bspline.h
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/kino_replan_fsm.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/bspline/include/bspline/non_uniform_bspline.h
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/kino_replan_fsm.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/bspline_opt/include/bspline_opt/bspline_optimizer.h
+Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/kino_replan_fsm.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/bspline_opt/include/bspline_opt/lbfgs.hpp
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/kino_replan_fsm.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/path_searching/include/path_searching/astar.h
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/kino_replan_fsm.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/path_searching/include/path_searching/kinodynamic_astar.h
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/kino_replan_fsm.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/path_searching/include/path_searching/topo_prm.h
@@ -1125,6 +1127,7 @@ Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/kino_
 
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/planner_manager.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/bspline/include/bspline/non_uniform_bspline.h
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/planner_manager.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/bspline_opt/include/bspline_opt/bspline_optimizer.h
+Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/planner_manager.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/bspline_opt/include/bspline_opt/lbfgs.hpp
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/planner_manager.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/path_searching/include/path_searching/astar.h
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/planner_manager.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/path_searching/include/path_searching/kinodynamic_astar.h
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/planner_manager.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/path_searching/include/path_searching/topo_prm.h
@@ -1681,6 +1684,7 @@ Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/plann
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/topo_replan_fsm.cpp.o: /home/zawubuntu/code/my_code/devel/include/plan_manage/Bspline.h
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/topo_replan_fsm.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/bspline/include/bspline/non_uniform_bspline.h
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/topo_replan_fsm.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/bspline_opt/include/bspline_opt/bspline_optimizer.h
+Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/topo_replan_fsm.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/bspline_opt/include/bspline_opt/lbfgs.hpp
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/topo_replan_fsm.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/path_searching/include/path_searching/astar.h
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/topo_replan_fsm.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/path_searching/include/path_searching/kinodynamic_astar.h
 Fast-Planner/fast_planner/plan_manage/CMakeFiles/fast_planner_node.dir/src/topo_replan_fsm.cpp.o: /home/zawubuntu/code/my_code/src/Fast-Planner/fast_planner/path_searching/include/path_searching/topo_prm.h

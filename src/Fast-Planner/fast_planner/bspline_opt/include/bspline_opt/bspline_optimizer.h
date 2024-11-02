@@ -211,7 +211,11 @@ private:
     static int earlyExit(void *func_data, const double *x, const double *g, const double fx, const double xnorm, const double gnorm, const double step, int n, int k, int ls);
 
     
-
+    void calculate_da_jk_dq(const Eigen::MatrixXd &q, const Eigen::MatrixXd &v, const Eigen::MatrixXd &a, Eigen::MatrixXd &da_jk_dq);
+    void calculate_dtheta_i_da(const Eigen::MatrixXd &v,const Eigen::MatrixXd &a, const Eigen::MatrixXd &angle, int i, Eigen::MatrixXd &dtheta_i_da);
+    void calculateSwingCostAndGradient(const Eigen::MatrixXd &q, const Eigen::MatrixXd &v,const Eigen::MatrixXd &a, const Eigen::MatrixXd &angle,
+                                      const double swing_angle_threshold, double &cost, Eigen::MatrixXd &gradient);
+    
 
   /* for benckmark evaluation only */
 public:

@@ -68,7 +68,7 @@ void KinoReplanFSM::init(ros::NodeHandle& nh) {
 void KinoReplanFSM::waypointCallback(const nav_msgs::PathConstPtr& msg) {
   if (msg->poses[0].pose.position.z < -0.1) return;
 
-  cout << "waypointCallback:Triggered!" << endl;
+  std::cout << "waypointCallback:Triggered!" << std::endl;
   trigger_ = true;
 
   if (target_type_ == TARGET_TYPE::MANUAL_TARGET) {
@@ -80,7 +80,7 @@ void KinoReplanFSM::waypointCallback(const nav_msgs::PathConstPtr& msg) {
     end_pt_(2)  = waypoints_[current_wp_][2];
     current_wp_ = (current_wp_ + 1) % waypoint_num_;
   }
-  cout <<"end_pt_"<< end_pt_(0)<<" "<<end_pt_(1)<<" "<<end_pt_(2)<< endl;
+  std::cout <<"end_pt_"<< end_pt_(0)<<" "<<end_pt_(1)<<" "<<end_pt_(2)<< std::endl;
 
   visualization_->drawGoal(end_pt_, 0.3, Eigen::Vector4d(0, 0, 1, 1.0));//终点可视化
   end_vel_.setZero();
@@ -113,13 +113,13 @@ void KinoReplanFSM::changeFSMExecState(FSM_EXEC_STATE new_state, string pos_call
   string state_str[5] = { "INIT", "WAIT_TARGET", "GEN_NEW_TRAJ", "REPLAN_TRAJ", "EXEC_TRAJ" };
   int    pre_s        = int(exec_state_);
   exec_state_         = new_state;
-  cout << "[" + pos_call + "]: from " + state_str[pre_s] + " to " + state_str[int(new_state)] << endl;
+  std::cout << "[" + pos_call + "]: from " + state_str[pre_s] + " to " + state_str[int(new_state)] << std::endl;
 }
 
 void KinoReplanFSM::printFSMExecState() {
   string state_str[5] = { "INIT", "WAIT_TARGET", "GEN_NEW_TRAJ", "REPLAN_TRAJ", "EXEC_TRAJ" };
 
-  cout << "[FSM]: state: " + state_str[int(exec_state_)] << endl;
+  std::cout << "[FSM]: state: " + state_str[int(exec_state_)] << std::endl;
 }
 
 void KinoReplanFSM::execFSMCallback(const ros::TimerEvent& e) {
@@ -127,8 +127,8 @@ void KinoReplanFSM::execFSMCallback(const ros::TimerEvent& e) {
   fsm_num++;
   if (fsm_num == 100) {
     printFSMExecState();
-    if (!have_odom_) cout << "no odom." << endl;
-    if (!trigger_) cout << "wait for goal." << endl;
+    if (!have_odom_) std::cout << "no odom." << std::endl;
+    if (!trigger_) std::cout << "wait for goal." << std::endl;
     fsm_num = 0;
   }
 
@@ -161,13 +161,14 @@ void KinoReplanFSM::execFSMCallback(const ros::TimerEvent& e) {
       Eigen::Vector3d rot_x = odom_orient_.toRotationMatrix().block(0, 0, 3, 1);
       start_yaw_(0)         = atan2(rot_x(1), rot_x(0));
       start_yaw_(1) = start_yaw_(2) = 0.0;
-      cout<<"GEN_NEW_TRAJ start_pt_ "<< start_pt_(0)<<" "<<start_pt_(1)<<" "<<start_pt_(2)<< endl;
+      std::cout<<"GEN_NEW_TRAJ start_pt_ "<< start_pt_(0)<<" "<<start_pt_(1)<<" "<<start_pt_(2)<< std::endl;
       bool success = callKinodynamicReplan();
       if (success) {
         changeFSMExecState(EXEC_TRAJ, "FSM");
       } else {
         // have_target_ = false;
         // changeFSMExecState(WAIT_TARGET, "FSM");
+        std::cout << "replan failed" << std::endl;
         changeFSMExecState(GEN_NEW_TRAJ, "FSM");
       }
       break;
@@ -190,11 +191,11 @@ void KinoReplanFSM::execFSMCallback(const ros::TimerEvent& e) {
         return;
 
       } else if ((end_pt_ - pos).norm() < no_replan_thresh_) {//快到达终点
-        // cout << "near end" << endl;
+        // std::cout << "near end" << std::endl;
         return;
 
       } else if ((info->start_pos_ - pos).norm() < replan_thresh_) {//很接近起点
-        // cout << "near start" << endl;
+        // std::cout << "near start" << std::endl;
         return;
 
       } else {
@@ -272,7 +273,7 @@ void KinoReplanFSM::checkCollisionCallback(const ros::TimerEvent& e) {
       }
 
       if (max_dist > 0.3) {
-        cout << "change goal, replan." << endl;
+        std::cout << "change goal, replan." << std::endl;
         end_pt_      = goal;
         have_target_ = true;
         end_vel_.setZero();
@@ -284,9 +285,9 @@ void KinoReplanFSM::checkCollisionCallback(const ros::TimerEvent& e) {
         visualization_->drawGoal(end_pt_, 0.3, Eigen::Vector4d(1, 0, 0, 1.0));
       } else {
         // have_target_ = false;
-        // cout << "Goal near collision, stop." << endl;
+        // std::cout << "Goal near collision, stop." << std::endl;
         // changeFSMExecState(WAIT_TARGET, "SAFETY");
-        cout << "goal near collision, keep retry" << endl;
+        std::cout << "goal near collision, keep retry" << std::endl;
         changeFSMExecState(REPLAN_TRAJ, "FSM");
 
         std_msgs::Empty emt;
@@ -301,7 +302,7 @@ void KinoReplanFSM::checkCollisionCallback(const ros::TimerEvent& e) {
     bool   safe = planner_manager_->checkTrajCollision(dist);
 
     if (!safe) {
-      // cout << "current traj in collision." << endl;
+      // std::cout << "current traj in collision." << std::endl;
       ROS_WARN("current traj in collision.");
       changeFSMExecState(REPLAN_TRAJ, "SAFETY");
     }
@@ -357,10 +358,9 @@ bool KinoReplanFSM::callKinodynamicReplan() {
     return true;
 
   } else {
-    cout << "generate new traj fail." << endl;
+    std::cout << "generate new traj fail." << std::endl;
     return false;
   }
 }
 
-// KinoReplanFSM::
 }  // namespace fast_planner
