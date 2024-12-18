@@ -633,7 +633,7 @@ bool BsplineOptimizer::BsplineOptimizeTrajRebound(Eigen::MatrixXd &optimal_point
     calcSmoothnessCost(cps_.points, f_smoothness, g_smoothness);// 计算平滑度代价和梯度
     calcDistanceCostRebound(cps_.points, f_distance, g_distance, iter_num_, f_smoothness);// 计算距离代价和梯度
     calcFeasibilityCost(cps_.points, f_feasibility, g_feasibility);// 计算可行性代价和梯度
-    calcSwingCost(cps_.points, f_swing, g_swing);// 计算可行性代价和梯度
+    calcSwingCost(cps_.points, f_swing, g_swing);// 计算摆动代价和梯度
     // 组合成最终的代价函数值  
     lambda1_ = 1;
     new_lambda2_ = 1;
