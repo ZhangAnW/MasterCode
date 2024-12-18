@@ -17,6 +17,20 @@
         "random": "cpp",
         "optional": "cpp",
         "string_view": "cpp",
-        "tuple": "cpp"
+        "tuple": "cpp",
+        "deque": "cpp",
+        "string": "cpp",
+        "vector": "cpp",
+        "list": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp",
+        "chrono": "cpp",
+        "fstream": "cpp",
+        "istream": "cpp",
+        "numeric": "cpp",
+        "ostream": "cpp",
+        "sstream": "cpp"
     }
 }

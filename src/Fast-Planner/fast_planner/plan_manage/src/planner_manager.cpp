@@ -123,6 +123,9 @@ bool FastPlannerManager::checkTrajCollision(double& distance) {
 
 // SECTION kinodynamic replanning
 
+/*
+* 根据起点和终点，规划最终轨迹
+*/
 bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vector3d start_vel,
                                            Eigen::Vector3d start_acc, Eigen::Vector3d end_pt,
                                            Eigen::Vector3d end_vel) {
@@ -147,7 +150,7 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
   t1 = ros::Time::now();
 
   kino_path_finder_->reset();
-  //A*算法
+  //A*算法  init is true
   int status = kino_path_finder_->search(start_pt, start_vel, start_acc, end_pt, end_vel, true);
 
   if (status == KinodynamicAstar::NO_PATH) {
@@ -170,7 +173,7 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
   }
 
   plan_data_.kino_path_ = kino_path_finder_->getKinoTraj(0.01);//获得轨迹，维度3*n
-  std::cout<< "getKinoTraj kino_path_ "<<plan_data_.kino_path_.size()<<std::endl;//获得轨迹点的个数
+  std::cout<< "getKinoTraj kino_path_ point num "<<plan_data_.kino_path_.size()<<std::endl;//获得轨迹点的个数
 
   t_search = (ros::Time::now() - t1).toSec();
 
@@ -194,7 +197,9 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
   std::cout << "end acc: " << start_end_derivatives[3].transpose() << std::endl;
 
   Eigen::MatrixXd ctrl_pts;
+  //static function, so it can be called without an object
   NonUniformBspline::parameterizeToBspline(ts, point_set, start_end_derivatives, ctrl_pts);
+  //creat object
   NonUniformBspline init(ctrl_pts, 3, ts);//control_points=2+point_set  控制点，3阶次，时间间隔ts
   // //打印输出ctrl_pts 时间间隔
   // std::cout<<ts<<std::endl;

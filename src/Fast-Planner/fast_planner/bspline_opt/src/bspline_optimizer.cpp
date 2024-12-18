@@ -499,7 +499,7 @@ bool BsplineOptimizer::isQuadratic() {
   return false;
 }
 
-//B样条优化轨迹，将轨迹推出障碍物，得到最优的无碰撞轨迹
+//B样条优化轨迹，输入优化点，间隔
 bool BsplineOptimizer::BsplineOptimizeTrajRebound(Eigen::MatrixXd &optimal_points, double ts)
 {
   // //设置B样条曲线的间隔

@@ -643,7 +643,10 @@ std::vector<Eigen::Vector3d> KinodynamicAstar::getKinoTraj(double delta_t)
   // cout<<state_list.at(state_list.size()-1)<<endl;
   return state_list;
 }
+/*
 
+这个函数 getSamples 的主要作用是从一个动态路径（kinodynamic path）中提取出一系列采样点，并计算路径的起始和结束速度、加速度。
+*/
 void KinodynamicAstar::getSamples(double& ts, vector<Eigen::Vector3d>& point_set,
                                   vector<Eigen::Vector3d>& start_end_derivatives)
 {
