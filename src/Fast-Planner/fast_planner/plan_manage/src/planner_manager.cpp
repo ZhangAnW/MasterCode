@@ -203,7 +203,8 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
   NonUniformBspline init(ctrl_pts, 3, ts);//control_points=2+point_set  控制点，3阶次，时间间隔ts
   // //打印输出ctrl_pts 时间间隔
   // std::cout<<ts<<std::endl;
-  
+    getVelAndAcc(init);//获得速度和加速度，以及四旋翼轨迹
+  std::cout << "init done" << std::endl; 
   std::cout << "path2Bspline ctrl_pts: " << ctrl_pts.rows() << "*" << ctrl_pts.cols() << std::endl;
   // bspline trajectory optimization
 
@@ -274,93 +275,154 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
   
   return true;
 }
+// // 将弧度转换为角度的函数
+// double radianToDegree(double radian) {
+//     return radian * 180.0 / M_PI;
+// }
 
+// // 计算向量与z轴负方向夹角（角度制）的函数
+// double angleWithZNegativeAxis(const Eigen::Vector3d& q) {
+//     // z轴负方向的单位向量
+//     Eigen::Vector3d z_negative(0, 0, -1);
+//     // 计算向量点积
+//     double dot_product = q.dot(z_negative);
+//     // 计算向量q的模长
+//     double q_norm = q.norm();
+//     // 计算夹角的余弦值
+//     double cos_angle = dot_product / (q_norm * z_negative.norm());
+//     // 使用acos得到弧度值
+//     double radian_angle = std::acos(cos_angle);
+//     // 将弧度值转换为角度值
+//     return radianToDegree(radian_angle);
+// }
+
+//这个是方法实
 // 方法实现
 void FastPlannerManager::getVelAndAcc(const NonUniformBspline& pos) {
-    // 方法1
+    //方法1
     NonUniformBspline position, vel, acc;
     position = pos;
-    vel = position.getDerivative();
-    acc = vel.getDerivative();
-
-    // 分别打印输出方法1的结果
-    std::cout << "method 1" << std::endl;
-    std::cout << "position" << std::endl;
-    Eigen::MatrixXd tep_pos;
-    tep_pos = position.getControlPoint();
-    for (int i = 0; i < tep_pos.rows(); i++) {
-        std::cout << "position " << i << ": " << tep_pos.row(i) << std::endl;
-    }
-    std::cout << "vel" << std::endl;
-    Eigen::MatrixXd tep_vel;
-    tep_vel = vel.getControlPoint();
-    for (int i = 0; i < tep_vel.rows(); i++) {
-        std::cout << "vel " << i << ": " << tep_vel.row(i) << std::endl;
-    }
-    std::cout << "acc" << std::endl;
-    Eigen::MatrixXd tep_acc;
-    tep_acc = acc.getControlPoint();
-    for (int i = 0; i < tep_acc.rows(); i++) {
-        std::cout << "acc " << i << ": " << tep_acc.row(i) << std::endl;
-    }
-
     // 方法2
     std::cout << "method 2" << std::endl;
-
-    Eigen::MatrixXd position_vector, vel_vector, acc_vector;
+    Eigen::MatrixXd pos_vec, vel_vec, acc_vec, angle_vec, angle;
     double internal = position.getInterval();
-    position_vector = position.getControlPoint();
-    int point_num = position_vector.rows();
+    pos_vec = position.getControlPoint();
+    int p_num = pos_vec.rows();
 
-    // 计算速度和加速度
-    vel_vector.resize(point_num, 3);
-    acc_vector.resize(point_num, 3);
-    for (int i = 0; i < point_num; i++) {
-        if (i == 0 || i == point_num - 1) {  // 起点
-            vel_vector.row(i).setZero();
-        }
-        else {
-            vel_vector.row(i) = (position_vector.row(i + 1) - position_vector.row(i)) / internal;
+    // 1. 计算速度和加速度
+    vel_vec.resize(p_num, 3);
+    acc_vec.resize(p_num, 3);
+    for (int i = 0; i < p_num - 1; i++) {
+        vel_vec.row(i) = (pos_vec.row(i + 1) - pos_vec.row(i)) / internal;
+    }
+    // 第一个速度值为局部规划的值
+    vel_vec.row(0) = 2 * (pos_vec.row(1) - pos_vec.row(0)) / internal - vel_vec.row(1);
+    // 最后一个速度值通过外推得到
+    vel_vec.row(p_num - 1) = 2 * (pos_vec.row(p_num - 1) - pos_vec.row(p_num - 2)) / internal - vel_vec.row(p_num - 2);
+    for (int i = 0; i < p_num - 1; i++) {
+        acc_vec.row(i) = (vel_vec.row(i + 1) - vel_vec.row(i)) / internal;
+    }
+    // 第一个和最后一个加速度值通过外推得到
+    acc_vec.row(0) = 2 * (vel_vec.row(1) - vel_vec.row(0)) / internal - acc_vec.row(1);
+    acc_vec.row(p_num - 1) = 2 * (vel_vec.row(p_num - 1) - vel_vec.row(p_num - 2)) / internal - acc_vec.row(p_num - 2);
+
+    // 新增：计算jerk向量
+    Eigen::MatrixXd jerk_vec(p_num, 3);
+    for (int i = 0; i < p_num - 1; i++) {
+        jerk_vec.row(i) = (acc_vec.row(i + 1) - acc_vec.row(i)) / internal;
+    }
+    // 第一个jerk值通过外推得到
+    jerk_vec.row(0) = 2 * (acc_vec.row(1) - acc_vec.row(0)) / internal - jerk_vec.row(1);
+    // 最后一个jerk值通过外推得到
+    jerk_vec.row(p_num - 1) = 2 * (acc_vec.row(p_num - 1) - acc_vec.row(p_num - 2)) / internal - jerk_vec.row(p_num - 2);
+
+    
+
+    // 2. 计算摆角
+    double g = 9.81; // 重力加速度
+    Eigen::Vector3d ge_3(0, 0, g); // 重力向量
+    angle.resize(p_num, 1);          // 摆角矩阵 (n*1)
+    angle_vec.resize(p_num, 3);      // 摆动方向矩阵 (n*3)
+    for (int i = 0; i < p_num; i++) {
+        Eigen::Vector3d acc_with_g = acc_vec.row(i).transpose() + ge_3; // 加速度加上重力
+        double norm = acc_with_g.norm();                         // 计算模长
+        if (norm > 0) {
+            // Normalize the swing vector
+            Eigen::Vector3d swing_vector = -acc_with_g / norm;
+            angle_vec.row(i) = swing_vector.transpose(); // 摆动方向向量
+            // Calculate the angle (in radians) relative to the -z axis
+            double rad = std::acos(-swing_vector(2)); // acos gives angle from -z axis
+            angle(i, 0) = rad * (180.0 / M_PI);       // Convert radians to degrees
+        } else {
+            // If norm is zero, set the swing vector to zero and angle to 0
+            angle_vec.row(i) = Eigen::RowVector3d::Zero();
+            angle(i, 0) = 0;
         }
     }
-    for (int i = 0; i < point_num; i++) {
-        if (i == 0 || i == point_num - 1) {  // 起点终点
-            acc_vector.row(i) = Eigen::Vector3d(0, 0, 0);
-        }
-        else {
-            acc_vector.row(i) = (vel_vector.row(i + 1) - vel_vector.row(i)) / internal;
-        }
+
+
+
+    double length = 0.4;  // 绳长度
+
+    // 计算四旋翼坐标
+    Eigen::MatrixXd pos_vec_Q(p_num, 3);
+
+    for (int i = 0; i < p_num; i++) {
+        pos_vec_Q.row(i) = pos_vec.row(i) - length * angle_vec.row(i);
     }
-
-    // int length = 0.25;  // 绳长度
-    // // 计算摆角向量
-    // Eigen::MatrixXd swing_q(point_num, 3);
-    // Eigen::Vector3d gravity_vector(0, 0, 9.8);
-
-    // for (int i = 0; i < point_num; i++) {
-    //     Eigen::Vector3d direction = -acc_vector.row(i);  // 报错
-    //     direction += gravity_vector;
-    //     swing_q.row(i) = direction.normalized();
-    // }
-    // // 计算四旋翼坐标
-    // Eigen::MatrixXd postion_Q_vec(point_num, 3);
-
-    // for (int i = 0; i < point_num; i++) {
-    //     postion_Q_vec.row(i) = position_vector.row(i) - length * swing_q.row(i);
-    // }
+    // 分别计算速度、加速度、jerk的大小
+    Eigen::VectorXd vel_magnitude(p_num);
+    Eigen::VectorXd acc_magnitude(p_num);
+    Eigen::VectorXd jerk_magnitude(p_num);
+    for (int i = 0; i < p_num; i++) {
+        vel_magnitude(i) = vel_vec.row(i).norm();
+        acc_magnitude(i) = acc_vec.row(i).norm();
+        jerk_magnitude(i) = jerk_vec.row(i).norm();
+    }
 
     // 分别打印输出方法2的结果
-    std::cout << "position_vector: " << std::endl;
-    for (int i = 0; i < point_num; i++) {
-        std::cout << "position_vector " << i << ": " << position_vector.row(i) << std::endl;
+    std::cout << "pos_vec: " << std::endl;
+    for (int i = 0; i < p_num; i++) {
+        std::cout << "pos_vec " << i << ": " << pos_vec.row(i) << std::endl;
     }
-    std::cout << "vel_vector: " << std::endl;
-    for (int i = 0; i < point_num; i++) {
-        std::cout << "vel_vector " << i << ": " << vel_vector.row(i) << std::endl;
+    std::cout << "vel_vec: " << std::endl;
+    for (int i = 0; i < p_num; i++) {
+        std::cout << "vel_vec " << i << ": " << vel_vec.row(i) << std::endl;
     }
-    std::cout << "acc_vector: " << std::endl;
-    for (int i = 0; i < point_num; i++) {
-        std::cout << "acc_vector " << i << ": " << acc_vector.row(i) << std::endl;
+    std::cout << "acc_vec: " << std::endl;
+    for (int i = 0; i < p_num; i++) {
+        std::cout << "acc_vec " << i << ": " << acc_vec.row(i) << std::endl;
+    }
+    std::cout << "jerk_vec: " << std::endl;
+    for (int i = 0; i < p_num; i++) {
+        std::cout << "jerk_vec " << i << ": " << jerk_vec.row(i) << std::endl;
+    }
+    std::cout << "angle_vec: " << std::endl;
+    for (int i = 0; i < p_num; i++) {
+        std::cout << "angle_vec " << i << ": " << angle_vec.row(i) << std::endl;
+    }
+    std::cout << "Q pos_vec: " << std::endl;
+    for (int i = 0; i < p_num; i++) {
+        std::cout << "Q pos_vec " << i << ": " << pos_vec_Q.row(i) << std::endl;
+    }
+    std::cout << "vel_magnitude: " << std::endl;
+    for (int i = 0; i < p_num; i++) {
+        std::cout << "vel_magnitude " << i << ": " << vel_magnitude(i) << std::endl;
+    }
+    std::cout << "acc_magnitude: " << std::endl;
+    for (int i = 0; i < p_num; i++) {
+        std::cout << "acc_magnitude " << i << ": " << acc_magnitude(i) << std::endl;
+    }
+    std::cout << "jerk_magnitude: " << std::endl;
+    for (int i = 0; i < p_num; i++) {
+        std::cout << "jerk_magnitude " << i << ": " << jerk_magnitude(i) << std::endl;
+    }
+
+    std::cout << "angle: " << std::endl;
+    for (int i = 0; i < p_num; i++) {
+      
+        std::cout << "angle " << i << ": " << angle(i, 0) << std::endl;
+ 
     }
 }
 

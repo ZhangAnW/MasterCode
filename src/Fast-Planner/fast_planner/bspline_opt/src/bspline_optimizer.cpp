@@ -638,7 +638,7 @@ bool BsplineOptimizer::BsplineOptimizeTrajRebound(Eigen::MatrixXd &optimal_point
     lambda1_ = 1;
     new_lambda2_ = 1;
     lambda3_ = 1;
-    lambda4_ = 1;
+    lambda4_ = 0;
 
     f_combine = lambda1_ * f_smoothness + new_lambda2_ * f_distance + lambda3_ * f_feasibility + lambda4_ * f_swing;  
     printf("origin %f %f %f %f %f\n", f_smoothness, f_distance, f_feasibility, f_swing, f_combine);  
@@ -724,6 +724,7 @@ bool BsplineOptimizer::BsplineOptimizeTrajRebound(Eigen::MatrixXd &optimal_point
 
     cost = 0.0;//初始化cost = 0
     // ROS_INFO("calcSmoothnessCost");
+    falg_use_jerk = true;
     if (falg_use_jerk)//判断是否使用jerk优化
     {
       Eigen::Vector3d jerk, temp_j;
@@ -965,87 +966,6 @@ bool BsplineOptimizer::BsplineOptimizeTrajRebound(Eigen::MatrixXd &optimal_point
 #endif
   }
 void BsplineOptimizer::calcSwingCost(const Eigen::MatrixXd &q, double &cost, Eigen::MatrixXd &gradient) {
-    // // 检查输入参数 q 的有效性
-    // if (q.cols() < 4) {
-    //     std::cerr << "Input matrix q should have at least 4 columns." << std::endl;
-    //     cost = 0.0;
-    //     gradient.setZero();
-    //     return;
-    // }
-    // cost = 0.0;
-    // // 1. 由 q 计算各点的速度和加速度
-    // int n = q.cols();
-    // Eigen::MatrixXd v(3, n);
-    // Eigen::MatrixXd a(3, n);
-    // // 第一个速度值通过外推得到
-    // v.col(0) = 2 * (q.col(1) - q.col(0)) / bspline_interval_ - v.col(1);
-    
-    // for (int i = 1; i < n - 1; i++) {
-    //     v.col(i) = (q.col(i + 1) - q.col(i - 1)) / (2 * bspline_interval_);
-    // }
-    // // 最后一个速度值通过外推得到
-    // v.col(n - 1) = 2 * (q.col(n - 1) - q.col(n - 2)) / bspline_interval_ - v.col(n - 2);
-    
-    // for (int i = 1; i < n - 1; i++) {
-    //     a.col(i) = (q.col(i + 1) - 2 * q.col(i) + q.col(i - 1)) / (bspline_interval_ * bspline_interval_);
-    // }
-    
-    // // 第一个和最后一个加速度值通过外推得到
-    // a.col(0) = 2 * (a.col(1) - a.col(2)) / bspline_interval_;
-    // a.col(n - 1) = 2 * (a.col(n - 2) - a.col(n - 3)) / bspline_interval_;
-    // // 2. 计算摆角
-    // double g = 9.81; // 重力加速度
-    // // 计算摆角
-    // Eigen::MatrixXd ge_3(3, 1);
-    // ge_3 << 0, 0, g; // 重力向量
-    // Eigen::MatrixXd  angle(n, 1);
-    // Eigen::MatrixXd angle_Vec(3, n);
-
-    // for (int i = 0; i < n; i++) {
-    //     Eigen::VectorXd acc_with_g = a.col(i) + ge_3;
-    //     double norm = acc_with_g.norm(); // 计算模长
-    //     if (norm > 0) { // 避免除以0
-    //         //double rad = atan2(acc_with_g(2), acc_with_g.head<2>().norm()); // 计算摆角（弧度）
-    //         double rad = atan2(acc_with_g(2), norm); // 计算偏离z轴的角度（弧度）
-    //         angle(i, 0) = rad * (180.0 / M_PI); // 将弧度转换为角度
-    //         angle_Vec.col(i) = acc_with_g/norm;
-
-    //     } else {
-    //         //norm为0，则angle_Vec是0向量
-    //         angle_Vec.col(i)  = Eigen::Vector3d::Zero();
-    //         angle(i, 0) = 0; // 如果模长为0，摆角设为0
-    //     }
-    // }
-    // std::cout << "q: " << q << std::endl;
-    // std::cout << "v: " << v << std::endl;
-    // std::cout << "a: " << a << std::endl;
-    // std::cout << "angle: " << angle << std::endl;
-    // // 3. 定义摆角阈值
-    // double swing_angle_threshold = 10.0; // 10度
-    // // 4. 计算摆角代价和梯度信息
-    // calculateSwingCostAndGradient(q,v , a, angle, swing_angle_threshold, cost, gradient);
-
-    // // for (int i = 0; i < n-3; i++) {
-    // //   //角度的绝对值大于阈值，则加上差值的平方
-    // //   if (fabs(angle(i, 0)) > swing_angle_threshold) {
-    // //     double err = fabs(angle(i, 0)) - swing_angle_threshold;
-    // //     cost += err * err;
-    // //     double temp_j = 2.0 * err;
-    // //     /* jerk gradient */
-
-    // //     gradient.col(i + 0) += -temp_j;
-    // //     gradient.col(i + 1) += 3.0 * temp_j;
-    // //     gradient.col(i + 2) += -3.0 * temp_j;
-    // //     gradient.col(i + 3) += temp_j;
-    // //     }
-    // // }
-
-    // // 处理可能的数值不稳定情况
-    // if (!std::isfinite(cost)) {
-    //     std::cerr << "Calculated cost is not finite. Resetting to 0." << std::endl;
-    //     cost = 0.0;
-    // }
-
     // 检查输入参数 q 的有效性
     if (q.cols() < 4) {
         std::cerr << "Input matrix q should have at least 4 columns." << std::endl;
@@ -1054,12 +974,12 @@ void BsplineOptimizer::calcSwingCost(const Eigen::MatrixXd &q, double &cost, Eig
         return;
     }
     cost = 0.0;
-    // 1. 由 q 计算各点的速度和加速度
     int n = q.cols();
+    // 1. 由 q 计算各点的速度和加速度
+  
     Eigen::MatrixXd v(3, n);
     Eigen::MatrixXd a(3, n);
-
-    for (int i = 1; i < n-1; i++) {
+    for (int i = 0; i < n-1; i++) {
         v.col(i) = (q.col(i+1) - q.col(i)) / (bspline_interval_);
     }
     // 第一个速度值为局部规划的值
@@ -1071,8 +991,8 @@ void BsplineOptimizer::calcSwingCost(const Eigen::MatrixXd &q, double &cost, Eig
         a.col(i) = (v.col(i + 1) - v.col(i))/bspline_interval_;
     }
     // 第一个和最后一个加速度值通过外推得到
-    a.col(0) = 2 * (a.col(1) - a.col(2)) / bspline_interval_;
-    a.col(n - 1) = 2 * (a.col(n - 2) - a.col(n - 3)) / bspline_interval_;
+    a.col(0) = 2 * (v.col(1) - v.col(0)) / bspline_interval_ - a.col(1);
+    a.col(n - 1) = 2 * (v.col(n - 1) - v.col(n - 2)) / bspline_interval_ - a.col(n - 2);
     
     // 2. 计算摆角
     double g = 9.81; // 重力加速度
@@ -1081,28 +1001,36 @@ void BsplineOptimizer::calcSwingCost(const Eigen::MatrixXd &q, double &cost, Eig
     ge_3 << 0, 0, g; // 重力向量
     Eigen::MatrixXd  angle(n, 1);
     Eigen::MatrixXd angle_Vec(3, n);
-
     for (int i = 0; i < n; i++) {
         Eigen::VectorXd acc_with_g = a.col(i) + ge_3;
         double norm = acc_with_g.norm(); // 计算模长
-        if (norm > 0) { // 避免除以0
-            //double rad = atan2(acc_with_g(2), acc_with_g.head<2>().norm()); // 计算摆角（弧度）
-            double rad = atan2(acc_with_g(2), norm); // 计算偏离z轴的角度（弧度）
-            angle(i, 0) = rad * (180.0 / M_PI); // 将弧度转换为角度
-            angle_Vec.col(i) = acc_with_g/norm;
-
+        if (norm > 0) { // Avoid division by zero
+            // Normalize the swing vector
+            Eigen::Vector3d swing_vector = -acc_with_g / norm;
+            // Calculate the angle (in radians) relative to the -z axis
+            Eigen::Vector3d normalized_q = swing_vector.normalized();
+            angle_Vec.col(i) = normalized_q;
+            double rad = std::acos(-normalized_q(2)); // acos gives angle from z-axis
+            angle(i, 0) = rad * (180.0 / M_PI); // Convert radians to degrees
         } else {
-            //norm为0，则angle_Vec是0向量
-            angle_Vec.col(i)  = Eigen::Vector3d::Zero();
-            angle(i, 0) = 0; // 如果模长为0，摆角设为0
+            // If norm is zero, set the swing vector to zero and angle to 0
+            angle_Vec.col(i) = Eigen::Vector3d::Zero();
+            angle(i, 0) = 0;
         }
+
+    }
+
+    //打印swing_vector
+    std::cout << "swing_vector: " << std::endl;
+    for (int i = 0; i < n; i++) {
+        std::cout << angle_Vec.col(i).transpose() << std::endl;
     }
     std::cout << "q: " << q << std::endl;
     std::cout << "v: " << v << std::endl;
     std::cout << "a: " << a << std::endl;
-    std::cout << "angle: " << angle << std::endl;
+    std::cout << "angle: " << angle.transpose() << std::endl;
     // 3. 定义摆角阈值
-    double swing_angle_threshold = 10.0; // 10度
+    double swing_angle_threshold = 100.0; // 10度
     // 4. 计算摆角代价和梯度信息
     calculateSwingCostAndGradient(q,v , a, angle, swing_angle_threshold, cost, gradient);
 
