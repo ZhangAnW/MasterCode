@@ -633,7 +633,7 @@ void FastPlannerManager::reparamBspline(NonUniformBspline& bspline, double ratio
   for (double time = 0.0; time <= duration + 1e-4; time += dt) {
     point_set.push_back(bspline.evaluateDeBoorT(time));
   }
-  NonUniformBspline::parameterizeToBspline(dt, point_set, plan_data_.local_start_end_derivative_,
+NonUniformBspline::parameterizeToBspline(dt, point_set, plan_data_.local_start_end_derivative_,
                                            ctrl_pts);
   // ROS_WARN("prev: %d, new: %d", prev_num, ctrl_pts.rows());
 }

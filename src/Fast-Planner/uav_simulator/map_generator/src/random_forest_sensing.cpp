@@ -23,7 +23,10 @@ vector<int> pointIdxRadiusSearch;
 vector<float> pointRadiusSquaredDistance;
 
 random_device rd;
-default_random_engine eng(rd());
+// default_random_engine eng(rd());
+//固定地图随机种子
+default_random_engine eng(2110164299);
+
 uniform_real_distribution<double> rand_x;
 uniform_real_distribution<double> rand_y;
 uniform_real_distribution<double> rand_w;
@@ -71,6 +74,10 @@ void RandomMapGenerate() {
   rand_theta_ = uniform_real_distribution<double>(-theta_, theta_);
   rand_z_ = uniform_real_distribution<double>(z_l_, z_h_);
 
+  std::cout << "random map generate" << std::endl;
+  std::cout << "obs num: " << _obs_num << std::endl;
+  std::cout << "circle num: " << circle_num_ << std::endl;
+  std::cout << "eng " << rd()<< std::endl;
   // generate polar obs
   for (int i = 0; i < _obs_num; i++) {
     double x, y, w, h;
