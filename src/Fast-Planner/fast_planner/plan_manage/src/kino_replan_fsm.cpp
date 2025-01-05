@@ -49,7 +49,7 @@ void KinoReplanFSM::init(ros::NodeHandle& nh) {
 
   /* initialize main modules */
   planner_manager_.reset(new FastPlannerManager);
-  planner_manager_->initPlanModules(nh);
+    planner_manager_->initPlanModules(nh, visualization_);// 初始化规划模块
   visualization_.reset(new PlanningVisualization(nh));
 
   /* callback */
@@ -355,6 +355,8 @@ bool KinoReplanFSM::callKinodynamicReplan() {
     visualization_->drawBspline(info->position_traj_, 0.1, Eigen::Vector4d(1.0, 0, 0.0, 1), true, 0.2,
                                 Eigen::Vector4d(1, 0, 1, 1));
     ROS_INFO("visulization success");
+    // visualization_->
+    
     return true;
 
   } else {

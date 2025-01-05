@@ -192,7 +192,8 @@ void odomCallbck(const nav_msgs::Odometry& msg) {
 
   if (traj_real_.size() > 10000) traj_real_.erase(traj_real_.begin(), traj_real_.begin() + 1000);
 }
-\\执行轨迹可视化
+//执行轨迹可视化
+
 void visCallback(const ros::TimerEvent& e) {
   // displayTrajWithColor(traj_real_, 0.03, Eigen::Vector4d(0.925, 0.054, 0.964,
   // 1),

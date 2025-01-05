@@ -36,6 +36,8 @@
 #include <plan_env/edt_environment.h>
 
 #include <plan_manage/plan_container.hpp>
+#include <traj_utils/planning_visualization.h>
+
 
 #include <ros/ros.h>
 
@@ -60,7 +62,7 @@ public:
   void planYaw(const Eigen::Vector3d& start_yaw);
   void getVelAndAcc(const NonUniformBspline& pos);
 
-  void initPlanModules(ros::NodeHandle& nh);
+  void initPlanModules(ros::NodeHandle &nh, PlanningVisualization::Ptr vis = NULL);
   void setGlobalWaypoints(vector<Eigen::Vector3d>& waypoints);
 
   bool checkTrajCollision(double& distance);
@@ -74,6 +76,7 @@ public:
 private:
   /* main planning algorithms & modules */
   SDFMap::Ptr sdf_map_;
+  PlanningVisualization::Ptr visualization_;
 
   unique_ptr<Astar> geo_path_finder_;
   unique_ptr<KinodynamicAstar> kino_path_finder_;

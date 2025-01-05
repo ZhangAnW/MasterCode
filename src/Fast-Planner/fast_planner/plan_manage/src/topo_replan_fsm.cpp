@@ -49,7 +49,7 @@ void TopoReplanFSM::init(ros::NodeHandle& nh) {
 
   /* initialize main modules */
   planner_manager_.reset(new FastPlannerManager);
-  planner_manager_->initPlanModules(nh);
+  planner_manager_->initPlanModules(nh, visualization_);// 初始化规划模块
   visualization_.reset(new PlanningVisualization(nh));
 
   /* callback */

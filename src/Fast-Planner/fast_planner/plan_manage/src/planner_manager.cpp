@@ -34,7 +34,7 @@ FastPlannerManager::FastPlannerManager() {}
 
 FastPlannerManager::~FastPlannerManager() { std::cout << "des manager" << std::endl; }
 
-void FastPlannerManager::initPlanModules(ros::NodeHandle& nh) {
+void FastPlannerManager::initPlanModules(ros::NodeHandle &nh, PlanningVisualization::Ptr vis){
   /* read algorithm parameters */
 
   nh.param("manager/max_vel", pp_.max_vel_, -1.0);
@@ -85,6 +85,8 @@ void FastPlannerManager::initPlanModules(ros::NodeHandle& nh) {
     topo_prm_->setEnvironment(edt_environment_);
     topo_prm_->init(nh);
   }
+      visualization_ = vis;
+
 }
 
 void FastPlannerManager::setGlobalWaypoints(vector<Eigen::Vector3d>& waypoints) {
@@ -273,6 +275,8 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
   getVelAndAcc(pos);//获得速度和加速度，以及四旋翼轨迹
   updateTrajInfo();
   
+  // visualization_->displayAStarList(a_star_pathes, vis_id);
+
   return true;
 }
 // // 将弧度转换为角度的函数
