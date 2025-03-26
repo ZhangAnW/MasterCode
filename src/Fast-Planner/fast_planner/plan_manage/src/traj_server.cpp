@@ -54,7 +54,7 @@ double last_yaw_;
 double time_forward_;
 
 vector<Eigen::Vector3d> traj_cmd_, traj_real_;
-//执行轨迹可视化
+//已执行轨迹可视化
 void displayTrajWithColor(vector<Eigen::Vector3d> path, double resolution, Eigen::Vector4d color,
                           int id) {
   visualization_msgs::Marker mk;
@@ -192,14 +192,14 @@ void odomCallbck(const nav_msgs::Odometry& msg) {
 
   if (traj_real_.size() > 10000) traj_real_.erase(traj_real_.begin(), traj_real_.begin() + 1000);
 }
-//执行轨迹可视化
+//已执行轨迹可视化
 
 void visCallback(const ros::TimerEvent& e) {
   // displayTrajWithColor(traj_real_, 0.03, Eigen::Vector4d(0.925, 0.054, 0.964,
   // 1),
   //                      1);
 
-  displayTrajWithColor(traj_cmd_, 0.05, Eigen::Vector4d(0, 1, 0, 1), 2);
+  displayTrajWithColor(traj_cmd_, 0.1, Eigen::Vector4d(0, 1, 0, 1), 2);
 }
 
 void cmdCallback(const ros::TimerEvent& e) {

@@ -31,6 +31,9 @@ namespace fast_planner {
 PlanningVisualization::PlanningVisualization(ros::NodeHandle& nh) {
   node = nh;
 
+  init_list_pub = nh.advertise<visualization_msgs::Marker>("/planning_vis/init_list", 20);
+
+  //b样条轨迹
   traj_pub_ = node.advertise<visualization_msgs::Marker>("/planning_vis/trajectory", 20);
   pubs_.push_back(traj_pub_);
 
@@ -49,6 +52,8 @@ PlanningVisualization::PlanningVisualization(ros::NodeHandle& nh) {
   yaw_pub_ = node.advertise<visualization_msgs::Marker>("/planning_vis/yaw", 20);
   pubs_.push_back(yaw_pub_);
 
+
+
   last_topo_path1_num_     = 0;
   last_topo_path2_num_     = 0;
   last_bspline_phase1_num_ = 0;
@@ -65,7 +70,7 @@ void PlanningVisualization::displaySphereList(const vector<Eigen::Vector3d>& lis
   mk.action          = visualization_msgs::Marker::DELETE;
   mk.id              = id;
   pubs_[pub_id].publish(mk);
-
+  std::cout << "pubs size: " << pubs_.size() << "pub_id: " << pub_id << std::endl;
   mk.action             = visualization_msgs::Marker::ADD;
   mk.pose.orientation.x = 0.0;
   mk.pose.orientation.y = 0.0;
@@ -203,6 +208,7 @@ void PlanningVisualization::drawBspline(NonUniformBspline& bspline, double size,
                                         const Eigen::Vector4d& color, bool show_ctrl_pts, double size2,
                                         const Eigen::Vector4d& color2, int id1, int id2) {
   if (bspline.getControlPoint().size() == 0) return;
+  std::cout << "Bspline vis  id is " << BSPLINE + id1 % 100 << BSPLINE_CTRL_PT + id2 % 100 << std::endl;                              
 
   vector<Eigen::Vector3d> traj_pts;
   double                  tm, tmp;
@@ -226,6 +232,61 @@ void PlanningVisualization::drawBspline(NonUniformBspline& bspline, double size,
   }
 
   displaySphereList(ctp, size2, color2, BSPLINE_CTRL_PT + id2 % 100);
+}
+// // real ids used: {id, id+1000}
+
+  void PlanningVisualization::displayMarkerList(ros::Publisher &pub, const vector<Eigen::Vector3d> &list, double scale,
+                                               Eigen::Vector4d color, int id)
+  {
+    std::cout << "显示初始轨迹点，并以线条连接sd这些点" << std::endl;
+
+    visualization_msgs::Marker sphere, line_strip;
+    sphere.header.frame_id = line_strip.header.frame_id = "world";
+    sphere.header.stamp = line_strip.header.stamp = ros::Time::now();
+    sphere.type = visualization_msgs::Marker::SPHERE_LIST;
+    line_strip.type = visualization_msgs::Marker::LINE_STRIP;
+    sphere.action = line_strip.action = visualization_msgs::Marker::ADD;
+    sphere.id = id;
+    line_strip.id = id + 1000;
+    std::cout << "显示初始轨迹点，并以线条连接sd这些点" << std::endl;
+
+    sphere.pose.orientation.w = line_strip.pose.orientation.w = 1.0;
+    sphere.color.r = line_strip.color.r = color(0);
+    sphere.color.g = line_strip.color.g = color(1);
+    sphere.color.b = line_strip.color.b = color(2);
+    sphere.color.a = line_strip.color.a = color(3) > 1e-5 ? color(3) : 1.0;
+    sphere.scale.x = scale;
+    sphere.scale.y = scale;
+    sphere.scale.z = scale;
+    line_strip.scale.x = scale / 2;
+    geometry_msgs::Point pt;
+    for (int i = 0; i < int(list.size()); i++)
+    {
+      pt.x = list[i](0);
+      pt.y = list[i](1);
+      pt.z = list[i](2);
+      sphere.points.push_back(pt);
+      line_strip.points.push_back(pt);
+    }
+        std::cout << "发布准备" << std::endl;
+
+    pub.publish(sphere);
+    pub.publish(line_strip);
+    ros::Duration(0.001).sleep();
+
+  }
+
+void PlanningVisualization::displayInitPathList(vector<Eigen::Vector3d> init_pts, const double scale, int id)
+{
+
+    // if (init_list_pub.getNumSubscribers() == 0)
+    // {
+    //   return;
+    // }
+
+    Eigen::Vector4d color(0, 0, 1, 1);
+    std::cout << "显示初始轨迹点，并以线条连接sd这些点" << std::endl;
+    displayMarkerList(init_list_pub, init_pts, scale, color, id);
 }
 
 void PlanningVisualization::drawTopoGraph(list<GraphNode::Ptr>& graph, double point_size,
@@ -321,6 +382,7 @@ void PlanningVisualization::drawGoal(Eigen::Vector3d goal, double resolution,
 
 void PlanningVisualization::drawGeometricPath(const vector<Eigen::Vector3d>& path, double resolution,
                                               const Eigen::Vector4d& color, int id) {
+  std::cout << "A* vis  id is " << PATH + id % 100 << std::endl;                              
   displaySphereList(path, resolution, color, PATH + id % 100);
 }
 

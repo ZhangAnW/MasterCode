@@ -66,6 +66,8 @@ private:
   ros::Publisher visib_pub_;     // 3, visibility constraints
   ros::Publisher frontier_pub_;  // 4, frontier searching
   ros::Publisher yaw_pub_;       // 5, yaw trajectory
+  ros::Publisher init_list_pub;
+
   vector<ros::Publisher> pubs_;  //
 
   int last_topo_path1_num_;
@@ -80,12 +82,15 @@ public:
   PlanningVisualization(ros::NodeHandle& nh);
 
   // draw basic shapes
+  void displayMarkerList(ros::Publisher &pub, const vector<Eigen::Vector3d> &list, double scale,
+                           Eigen::Vector4d color, int id);
   void displaySphereList(const vector<Eigen::Vector3d>& list, double resolution,
                          const Eigen::Vector4d& color, int id, int pub_id = 0);
   void displayCubeList(const vector<Eigen::Vector3d>& list, double resolution,
                        const Eigen::Vector4d& color, int id, int pub_id = 0);
   void displayLineList(const vector<Eigen::Vector3d>& list1, const vector<Eigen::Vector3d>& list2,
                        double line_width, const Eigen::Vector4d& color, int id, int pub_id = 0);
+  void displayInitPathList(vector<Eigen::Vector3d> init_pts, const double scale, int id);
 
   // draw a piece-wise straight line path
   void drawGeometricPath(const vector<Eigen::Vector3d>& path, double resolution,

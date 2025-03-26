@@ -199,6 +199,14 @@ Visualization Manager:
             "": true
           Queue Size: 100
           Value: true
+        - Class: rviz/Marker
+          Enabled: false
+          Marker Topic: planning_vis/init_list
+          Name: InitTraj
+          Namespaces:
+            {}
+          Queue Size: 100
+          Value: false
       Enabled: true
       Name: Planning
     - Class: rviz/Group

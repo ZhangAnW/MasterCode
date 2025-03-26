@@ -201,11 +201,14 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
   Eigen::MatrixXd ctrl_pts;
   //static function, so it can be called without an object
   NonUniformBspline::parameterizeToBspline(ts, point_set, start_end_derivatives, ctrl_pts);
-  //creat object
+  //creat object 初始控制点
   NonUniformBspline init(ctrl_pts, 3, ts);//control_points=2+point_set  控制点，3阶次，时间间隔ts
+  //visualization_->displayInitPathList(point_set, 0.2, 0);
+
+  
   // //打印输出ctrl_pts 时间间隔
   // std::cout<<ts<<std::endl;
-    getVelAndAcc(init);//获得速度和加速度，以及四旋翼轨迹
+  getVelAndAcc(init);//获得速度和加速度，以及四旋翼轨迹
   std::cout << "init done" << std::endl; 
   std::cout << "path2Bspline ctrl_pts: " << ctrl_pts.rows() << "*" << ctrl_pts.cols() << std::endl;
   // bspline trajectory optimization
@@ -275,7 +278,6 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
   getVelAndAcc(pos);//获得速度和加速度，以及四旋翼轨迹
   updateTrajInfo();
   
-  // visualization_->displayAStarList(a_star_pathes, vis_id);
 
   return true;
 }

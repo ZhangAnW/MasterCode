@@ -123,30 +123,41 @@ void KinoReplanFSM::printFSMExecState() {
 }
 
 void KinoReplanFSM::execFSMCallback(const ros::TimerEvent& e) {
+  // 定义一个静态变量fsm_num，用于记录FSM执行的次数
   static int fsm_num = 0;
   fsm_num++;
+  // 每执行100次，打印FSM执行状态
   if (fsm_num == 100) {
     printFSMExecState();
+    // 如果没有odom，打印提示信息
     if (!have_odom_) std::cout << "no odom." << std::endl;
+    // 如果没有触发，打印提示信息
     if (!trigger_) std::cout << "wait for goal." << std::endl;
+    // 重置fsm_num
     fsm_num = 0;
   }
 
+  // 根据exec_state_的值，执行不同的操作
   switch (exec_state_) {
     case INIT: {
+      // 如果没有odom，直接返回
       if (!have_odom_) {
         return;
       }
+      // 如果没有触发，直接返回
       if (!trigger_) {
         return;
       }
+      // 将exec_state_设置为WAIT_TARGET，并打印提示信息
       changeFSMExecState(WAIT_TARGET, "FSM");
       break;
     }
 
     case WAIT_TARGET: {
+      // 如果没有目标，直接返回
       if (!have_target_)
         return;
+      // 否则，将exec_state_设置为GEN_NEW_TRAJ
       else {
         changeFSMExecState(GEN_NEW_TRAJ, "FSM");
       }
@@ -154,14 +165,18 @@ void KinoReplanFSM::execFSMCallback(const ros::TimerEvent& e) {
     }
 
     case GEN_NEW_TRAJ: {
+      // 设置起点、速度、加速度
       start_pt_  = odom_pos_;
       start_vel_ = odom_vel_;
       start_acc_.setZero();
 
+      // 计算起点yaw
       Eigen::Vector3d rot_x = odom_orient_.toRotationMatrix().block(0, 0, 3, 1);
       start_yaw_(0)         = atan2(rot_x(1), rot_x(0));
       start_yaw_(1) = start_yaw_(2) = 0.0;
+      // 打印起点坐标
       std::cout<<"GEN_NEW_TRAJ start_pt_ "<< start_pt_(0)<<" "<<start_pt_(1)<<" "<<start_pt_(2)<< std::endl;
+      // 调用callKinodynamicReplan()函数，如果成功，将exec_state_设置为EXEC_TRAJ，否则打印提示信息，并将exec_state_设置为GEN_NEW_TRAJ
       bool success = callKinodynamicReplan();
       if (success) {
         changeFSMExecState(EXEC_TRAJ, "FSM");
@@ -177,11 +192,13 @@ void KinoReplanFSM::execFSMCallback(const ros::TimerEvent& e) {
     case EXEC_TRAJ: {
       /* determine if need to replan */
 
+      // 获取当前轨迹信息
       LocalTrajData* info     = &planner_manager_->local_data_;
       ros::Time      time_now = ros::Time::now();
       double         t_cur    = (time_now - info->start_time_).toSec();
       t_cur                   = min(info->duration_, t_cur);
 
+      // 计算当前位置
       Eigen::Vector3d pos = info->position_traj_.evaluateDeBoorT(t_cur);
 
       /* && (end_pt_ - pos).norm() < 0.5 */
@@ -199,6 +216,7 @@ void KinoReplanFSM::execFSMCallback(const ros::TimerEvent& e) {
         return;
 
       } else {
+        //定周期的进行轨迹重规划，这里的逻辑可以改一下，根据当前四旋翼的位置，距离终点的距离，距离起点的距离，来决定是否需要重规划
         changeFSMExecState(REPLAN_TRAJ, "FSM");
       }
       break;
@@ -351,7 +369,10 @@ bool KinoReplanFSM::callKinodynamicReplan() {
 
     /* visulization */
     auto plan_data = &planner_manager_->plan_data_;
-    // visualization_->drawGeometricPath(plan_data->kino_path_, 0.075, Eigen::Vector4d(1, 1, 0, 0.4));
+    //A*算法可视化
+    visualization_->drawGeometricPath(plan_data->kino_path_, 0.075, Eigen::Vector4d(1, 1, 0, 0.4));
+
+    //B样条曲线可视化
     visualization_->drawBspline(info->position_traj_, 0.1, Eigen::Vector4d(1.0, 0, 0.0, 1), true, 0.2,
                                 Eigen::Vector4d(1, 0, 1, 1));
     ROS_INFO("visulization success");
