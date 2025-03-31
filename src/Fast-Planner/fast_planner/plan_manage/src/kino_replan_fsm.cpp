@@ -82,7 +82,7 @@ void KinoReplanFSM::waypointCallback(const nav_msgs::PathConstPtr& msg) {
   }
   std::cout <<"end_pt_"<< end_pt_(0)<<" "<<end_pt_(1)<<" "<<end_pt_(2)<< std::endl;
 
-  visualization_->drawGoal(end_pt_, 0.3, Eigen::Vector4d(0, 0, 1, 1.0));//终点可视化
+  visualization_->drawGoal(end_pt_, 0.3, Eigen::Vector4d(0, 0, 1, 1.0));//可视化  蓝色点  全局终点
   end_vel_.setZero();
   have_target_ = true;
 
@@ -126,6 +126,8 @@ void KinoReplanFSM::execFSMCallback(const ros::TimerEvent& e) {
   // 定义一个静态变量fsm_num，用于记录FSM执行的次数
   static int fsm_num = 0;
   fsm_num++;
+  //定义double常量 replan_near_last_end_thresh_
+  const double replan_near_last_end_thresh_ = 0.5;
   // 每执行100次，打印FSM执行状态
   if (fsm_num == 100) {
     printFSMExecState();
@@ -176,6 +178,8 @@ void KinoReplanFSM::execFSMCallback(const ros::TimerEvent& e) {
       start_yaw_(1) = start_yaw_(2) = 0.0;
       // 打印起点坐标
       std::cout<<"GEN_NEW_TRAJ start_pt_ "<< start_pt_(0)<<" "<<start_pt_(1)<<" "<<start_pt_(2)<< std::endl;
+      std::cout<<"GEN_NEW_TRAJ end_pt_ "<< end_pt_(0)<<" "<<end_pt_(1)<<" "<<end_pt_(2)<< std::endl;
+
       // 调用callKinodynamicReplan()函数，如果成功，将exec_state_设置为EXEC_TRAJ，否则打印提示信息，并将exec_state_设置为GEN_NEW_TRAJ
       bool success = callKinodynamicReplan();
       if (success) {
@@ -200,7 +204,11 @@ void KinoReplanFSM::execFSMCallback(const ros::TimerEvent& e) {
 
       // 计算当前位置
       Eigen::Vector3d pos = info->position_traj_.evaluateDeBoorT(t_cur);
-
+      // 获取当前轨迹的最后一个点作为上次规划的终点
+      Eigen::Vector3d last_planned_end = info->position_traj_.evaluateDeBoorT(info->duration_);
+      //输出当前位置和上次规划的终点
+      std::cout<<"EXEC_TRAJ pos "<< pos(0)<<" "<<pos(1)<<" "<<pos(2)<< std::endl;
+      std::cout<<"EXEC_TRAJ last_planned_end "<< last_planned_end(0)<<" "<<last_planned_end(1)<<" "<<last_planned_end(2)<< std::endl;
       /* && (end_pt_ - pos).norm() < 0.5 */
       if (t_cur > info->duration_ - 1e-2) {//持续时间大于规划时间
         have_target_ = false;
@@ -217,7 +225,13 @@ void KinoReplanFSM::execFSMCallback(const ros::TimerEvent& e) {
 
       } else {
         //定周期的进行轨迹重规划，这里的逻辑可以改一下，根据当前四旋翼的位置，距离终点的距离，距离起点的距离，来决定是否需要重规划
-        changeFSMExecState(REPLAN_TRAJ, "FSM");
+        // changeFSMExecState(REPLAN_TRAJ, "FSM");
+        if ((last_planned_end - pos).norm() < replan_near_last_end_thresh_) { // 快到达上次规划的终点时进行重规划
+          changeFSMExecState(REPLAN_TRAJ, "FSM");
+        }
+        // have_target_ = false;
+        // changeFSMExecState(WAIT_TARGET, "FSM");
+        // return;
       }
       break;
     }
@@ -297,6 +311,8 @@ void KinoReplanFSM::checkCollisionCallback(const ros::TimerEvent& e) {
         end_vel_.setZero();
 
         if (exec_state_ == EXEC_TRAJ) {
+          std::cout << "max_dist > 0.3" << std::endl;
+
           changeFSMExecState(REPLAN_TRAJ, "SAFETY");
         }
 
@@ -320,7 +336,7 @@ void KinoReplanFSM::checkCollisionCallback(const ros::TimerEvent& e) {
     bool   safe = planner_manager_->checkTrajCollision(dist);
 
     if (!safe) {
-      // std::cout << "current traj in collision." << std::endl;
+      std::cout << "current traj in collision." << std::endl;
       ROS_WARN("current traj in collision.");
       changeFSMExecState(REPLAN_TRAJ, "SAFETY");
     }
@@ -369,10 +385,10 @@ bool KinoReplanFSM::callKinodynamicReplan() {
 
     /* visulization */
     auto plan_data = &planner_manager_->plan_data_;
-    //A*算法可视化
+    //可视化  青绿色 A*初始算法
     visualization_->drawGeometricPath(plan_data->kino_path_, 0.075, Eigen::Vector4d(1, 1, 0, 0.4));
 
-    //B样条曲线可视化
+    //可视化  红色 B样条曲线 粉红色 B样条控制点   
     visualization_->drawBspline(info->position_traj_, 0.1, Eigen::Vector4d(1.0, 0, 0.0, 1), true, 0.2,
                                 Eigen::Vector4d(1, 0, 1, 1));
     ROS_INFO("visulization success");

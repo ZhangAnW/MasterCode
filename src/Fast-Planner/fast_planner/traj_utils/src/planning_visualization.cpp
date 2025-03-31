@@ -207,17 +207,24 @@ void PlanningVisualization::drawBsplinesPhase2(vector<NonUniformBspline>& bsplin
 void PlanningVisualization::drawBspline(NonUniformBspline& bspline, double size,
                                         const Eigen::Vector4d& color, bool show_ctrl_pts, double size2,
                                         const Eigen::Vector4d& color2, int id1, int id2) {
+  // 如果控制点为空，则直接返回
   if (bspline.getControlPoint().size() == 0) return;
+  // 输出bspline的id
   std::cout << "Bspline vis  id is " << BSPLINE + id1 % 100 << BSPLINE_CTRL_PT + id2 % 100 << std::endl;                              
 
+  // 定义轨迹点
   vector<Eigen::Vector3d> traj_pts;
+  // 定义时间
   double                  tm, tmp;
+  // 获取时间范围
   bspline.getTimeSpan(tm, tmp);
 
+  // 遍历时间范围，计算轨迹点
   for (double t = tm; t <= tmp; t += 0.01) {
     Eigen::Vector3d pt = bspline.evaluateDeBoor(t);
     traj_pts.push_back(pt);
   }
+  // 显示轨迹点
   displaySphereList(traj_pts, size, color, BSPLINE + id1 % 100);
 
   // draw the control point
