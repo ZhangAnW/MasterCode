@@ -281,26 +281,6 @@ bool FastPlannerManager::kinodynamicReplan(Eigen::Vector3d start_pt, Eigen::Vect
 
   return true;
 }
-// // 将弧度转换为角度的函数
-// double radianToDegree(double radian) {
-//     return radian * 180.0 / M_PI;
-// }
-
-// // 计算向量与z轴负方向夹角（角度制）的函数
-// double angleWithZNegativeAxis(const Eigen::Vector3d& q) {
-//     // z轴负方向的单位向量
-//     Eigen::Vector3d z_negative(0, 0, -1);
-//     // 计算向量点积
-//     double dot_product = q.dot(z_negative);
-//     // 计算向量q的模长
-//     double q_norm = q.norm();
-//     // 计算夹角的余弦值
-//     double cos_angle = dot_product / (q_norm * z_negative.norm());
-//     // 使用acos得到弧度值
-//     double radian_angle = std::acos(cos_angle);
-//     // 将弧度值转换为角度值
-//     return radianToDegree(radian_angle);
-// }
 
 //这个是方法实
 // 方法实现

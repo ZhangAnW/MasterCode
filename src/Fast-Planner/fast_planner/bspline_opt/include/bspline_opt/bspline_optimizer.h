@@ -212,10 +212,6 @@ private:
 
     
     void calculate_da_jk_dq(const Eigen::MatrixXd &q, const Eigen::MatrixXd &v, const Eigen::MatrixXd &a, Eigen::MatrixXd &da_jk_dq);
-    void calculate_dtheta_i_da(const Eigen::MatrixXd &v,const Eigen::MatrixXd &a, const Eigen::MatrixXd &angle, int i, Eigen::MatrixXd &dtheta_i_da);
-    void calculateSwingCostAndGradient(const Eigen::MatrixXd &q, const Eigen::MatrixXd &v,const Eigen::MatrixXd &a, const Eigen::MatrixXd &angle,
-                                      const double swing_angle_threshold, double &cost, Eigen::MatrixXd &gradient);
-    
 
   /* for benckmark evaluation only */
 public:

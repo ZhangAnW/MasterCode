@@ -127,7 +127,7 @@ void KinoReplanFSM::execFSMCallback(const ros::TimerEvent& e) {
   static int fsm_num = 0;
   fsm_num++;
   //定义double常量 replan_near_last_end_thresh_
-  const double replan_near_last_end_thresh_ = 0.5;
+  const double replan_near_last_end_thresh_ = 1;
   // 每执行100次，打印FSM执行状态
   if (fsm_num == 100) {
     printFSMExecState();

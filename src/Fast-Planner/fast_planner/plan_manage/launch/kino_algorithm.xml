@@ -117,8 +117,8 @@
     <param name="search/max_vel" value="$(arg max_vel)" type="double"/>
     <param name="search/max_acc" value="$(arg max_acc)" type="double"/>
     <param name="search/w_time" value="10.0" type="double"/>
-      <!--这里修改A*算法的边界点，也就是到起点的距离-->>
-    <param name="search/horizon" value="5.0" type="double"/> 
+      <!--这里修改A*算法的边界点，也就是到起点的距离，重规划-->>
+    <param name="search/horizon" value="4.0" type="double"/> 
     <param name="search/lambda_heu" value="5.0" type="double"/>
     <param name="search/resolution_astar" value="0.1" type="double"/>
     <param name="search/time_resolution" value="0.8" type="double"/>
