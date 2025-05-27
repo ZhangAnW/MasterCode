@@ -45,6 +45,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(so3_control)
 
+set(CMAKE_BUILD_TYPE "Release")
+set(CMAKE_CXX_FLAGS "-std=c++11")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -g")
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -168,6 +172,12 @@ add_library(so3_control_nodelet src/so3_control_nodelet.cpp)
 target_link_libraries(so3_control_nodelet 
     ${catkin_LIBRARIES}
     SO3Control
+)
+
+
+add_executable(control_example src/control_example.cpp)
+target_link_libraries(control_example 
+${catkin_LIBRARIES}
 )
 
 ## Add cmake target dependencies of the executable/library
