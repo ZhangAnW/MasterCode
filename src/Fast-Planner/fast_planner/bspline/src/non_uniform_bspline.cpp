@@ -149,16 +149,14 @@ bool NonUniformBspline::checkFeasibility(bool show) {
   double max_vel = -1.0;
   for (int i = 0; i < P.rows() - 1; ++i) {
     Eigen::VectorXd vel = p_ * (P.row(i + 1) - P.row(i)) / (u_(i + p_ + 1) - u_(i + 1));
+    double vel_magnitude = vel.norm();
 
-    if (fabs(vel(0)) > limit_vel_ + 1e-4 || fabs(vel(1)) > limit_vel_ + 1e-4 ||
-        fabs(vel(2)) > limit_vel_ + 1e-4) {
-
+    if (vel_magnitude > limit_vel_ + 1e-4) {
+    
       if (show) cout << "[Check]: Infeasible vel " << i << " :" << vel.transpose() << endl;
       fea = false;
 
-      for (int j = 0; j < dimension; ++j) {
-        max_vel = max(max_vel, fabs(vel(j)));
-      }
+      max_vel = std::max(max_vel, vel_magnitude);
     }
   }
 
@@ -171,15 +169,12 @@ bool NonUniformBspline::checkFeasibility(bool show) {
          (P.row(i + 1) - P.row(i)) / (u_(i + p_ + 1) - u_(i + 1))) /
         (u_(i + p_ + 1) - u_(i + 2));
 
-    if (fabs(acc(0)) > limit_acc_ + 1e-4 || fabs(acc(1)) > limit_acc_ + 1e-4 ||
-        fabs(acc(2)) > limit_acc_ + 1e-4) {
+    double acc_magnitude = acc.norm();
 
+    if (acc_magnitude > limit_acc_ + 1e-4) {
       if (show) cout << "[Check]: Infeasible acc " << i << " :" << acc.transpose() << endl;
       fea = false;
-
-      for (int j = 0; j < dimension; ++j) {
-        max_acc = max(max_acc, fabs(acc(j)));
-      }
+      max_acc = std::max(max_acc, acc_magnitude);
     }
   }
 
@@ -230,17 +225,14 @@ bool NonUniformBspline::reallocateTime(bool show) {
   /* check vel feasibility and insert points */
   for (int i = 0; i < P.rows() - 1; ++i) {
     Eigen::VectorXd vel = p_ * (P.row(i + 1) - P.row(i)) / (u_(i + p_ + 1) - u_(i + 1));
-
-    if (fabs(vel(0)) > limit_vel_ + 1e-4 || fabs(vel(1)) > limit_vel_ + 1e-4 ||
-        fabs(vel(2)) > limit_vel_ + 1e-4) {
-
+    
+    double vel_magnitude = vel.norm();
+    if (vel_magnitude > limit_vel_ + 1e-4) {
       fea = false;
       if (show) cout << "[Realloc]: Infeasible vel " << i << " :" << vel.transpose() << endl;
 
       max_vel = -1.0;
-      for (int j = 0; j < dimension; ++j) {
-        max_vel = max(max_vel, fabs(vel(j)));
-      }
+      max_vel = std::max(max_vel, vel_magnitude);
 
       double ratio = max_vel / limit_vel_ + 1e-4;
       if (ratio > limit_ratio_) ratio = limit_ratio_;
@@ -270,17 +262,15 @@ bool NonUniformBspline::reallocateTime(bool show) {
         ((P.row(i + 2) - P.row(i + 1)) / (u_(i + p_ + 2) - u_(i + 2)) -
          (P.row(i + 1) - P.row(i)) / (u_(i + p_ + 1) - u_(i + 1))) /
         (u_(i + p_ + 1) - u_(i + 2));
+    double acc_magnitude = acc.norm();
 
-    if (fabs(acc(0)) > limit_acc_ + 1e-4 || fabs(acc(1)) > limit_acc_ + 1e-4 ||
-        fabs(acc(2)) > limit_acc_ + 1e-4) {
+    if (acc_magnitude > limit_acc_ + 1e-4) {
 
       fea = false;
       if (show) cout << "[Realloc]: Infeasible acc " << i << " :" << acc.transpose() << endl;
 
       max_acc = -1.0;
-      for (int j = 0; j < dimension; ++j) {
-        max_acc = max(max_acc, fabs(acc(j)));
-      }
+      max_acc = std::max(max_acc, acc_magnitude);
 
       double ratio = sqrt(max_acc / limit_acc_) + 1e-4;
       if (ratio > limit_ratio_) ratio = limit_ratio_;
